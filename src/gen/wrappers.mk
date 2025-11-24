@@ -1,0 +1,31 @@
+WRAPPER_BINDINGS := QAbstractButton \
+                    QAbstractScrollArea \
+                    QAction \
+                    QApplication \
+                    QBoxLayout \
+                    QDialog \
+                    QDialogButtonBox \
+                    QEventLoop \
+                    QFrame \
+                    QGridLayout \
+                    QHBoxLayout \
+                    QLabel \
+                    QLayout \
+                    QLineEdit \
+                    QMainWindow \
+                    QMenu \
+                    QMenuBar \
+                    QObject \
+                    QOpenGLWidget \
+                    QPainter \
+                    QPixmap \
+                    QPushButton \
+                    QStandardItem \
+                    QStandardItemModel \
+                    QTabWidget \
+                    QTableView \
+                    QTimer \
+                    QTreeView \
+                    QVBoxLayout \
+                    QWidget \
+                    QWidgetItem

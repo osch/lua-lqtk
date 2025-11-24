@@ -1,0 +1,875 @@
+// Type: @(className)
+// Base: @(thisDef.baseClass or "nil")
+
+/* ============================================================================================ */
+
+@ for _, n in ipairs(qincludes) do
+#include <@(n)>
+@ end
+
+#include <QPointer>
+#include <stdexcept>
+
+/* ============================================================================================ */
+
+#include "init.h"
+#include "util.hpp"
+#include "ClassInfo.hpp"
+#include "BindingUtil.hpp"
+#include "ObjectUdata.hpp"
+#include "ClassUdata.hpp"
+#include "trace.hpp"
+#include "FromLua.hpp"
+#include "ToLua.hpp"
+#include "registry.hpp"
+#include "StateGuard.hpp"
+@ if thisDef.needsGuard then
+#include "ObjectGuard.hpp"
+@ end
+@ for _, n in ipairs(qincludes) do
+#include "@(n)Binding.hpp"
+@ end
+@ if isExternalWrapperBase then
+#include "@(wrapperBase).hpp"
+@ end
+@ if needsWrapperClass then
+@  for i = #baseClasses, 1, -1 do
+@   local b = baseClasses[i]
+@   if needsWrapper(b) then
+#include "@(b)Wrapper.hpp"
+@   end
+@  end
+@ end
+@ 
+
+/* ============================================================================================ */
+
+using namespace lqtk;
+
+@ if needsWrapperClass then
+
+/* ============================================================================================ */
+
+namespace lqtk 
+{
+
+@ local cb = ")"
+@ local cnstr = constructor and constructor.binding or constructorProxy
+@ if cnstr then
+
+/* -------------------------------------------------------------------------------------------- */
+
+@ for _, bnd in ipairs(cnstr) do
+@   local args = bnd[2]
+    @(wrapperClass)::@(wrapperClass)(@(#args == 0 and cb or "")
+@   for i, a in ipairs(args) do
+@       if isPtrType(a) and isOnlyWrapped(getPtrElementType(a)) then
+                   @(getPtrElementType(a))WrapperBase* arg@(i)@(i < #args and "," or cb) 
+@       else
+                   @(toCType(a)) arg@(i)@(i < #args and "," or cb) 
+@       end
+@   end
+        : @(wrapperBase)(@(#args == 0 and cb..(hasVirtualMembers and "," or "") or "")
+@   for i, a in ipairs(args) do
+                   arg@(i)@(i < #args and "," or cb..(hasVirtualMembers and "," or ""))
+@   end
+@   if hasVirtualMembers then
+          lqtk_stateGuard(nullptr)
+@   end
+    {}
+@ end
+@ end
+
+/* -------------------------------------------------------------------------------------------- */
+
+@ if hasVirtualMembers then
+    int @(wrapperClass)::lqtk_destruct(lua_State* L) {
+        @(className)* objPtr = (@(className)*)lua_touserdata(L, 1);
+        StateGuard::clearWeakUserValue(L, objPtr);
+        StateGuard::clearStrongUserValue(L, objPtr);
+        return 0;
+    }
+@ end
+    @(wrapperClass)::~@(wrapperClass)() {
+        trace::printf("Deleting lqtk::@(wrapperClass): %p\n", this);
+@ if hasVirtualMembers then
+        if (lqtk_stateGuard) {
+            lua_State* L = lqtk_stateGuard->L;
+            if (L) {
+                @(className)* objPtr = this;
+                BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "@(className)");
+            }
+            StateGuard::releaseRef(&lqtk_stateGuard, StateGuard::FOR_QT_OBJECT);
+        }
+@ end
+    }
+@ for _, bname in ipairs(baseClasses) do
+@   if needsWrapper(bname) then
+@     local b = getBinding(bname)
+@     for _, member in ipairs(b.elements) do
+@       if member.method and member.binding then
+@         for _, bnd in ipairs(member.binding) do
+@           if not bnd.abstract and bnd.protected then
+@             local rslt = bnd[1]
+@             local args = bnd[2]
+
+    @(toCType(rslt)) @(wrapperClass)::lqtk_@(b.class)_@(member.method)(@(#args == 0 and cb or "")
+@             for i = 1, #args do
+@               local a = args[i]
+                   @(toCType(a)) arg@(i)@(i < #args and "," or cb) 
+@             end
+    {
+@             if needsValidityCheck then
+        lqtk_checkValidity();
+@             end
+        return @(b.class)::@(member.method)(@(#args == 0 and cb..";" or "")
+@             for i = 1, #args do
+@               local a = args[i]
+                   arg@(i)@(i < #args and "," or cb..";") 
+@             end
+    }
+@           end
+@         end
+@       end
+@     end
+@   end
+@ end
+@ if hasVirtualMembers then
+@   for _, member in ipairs(virtualMembers) do
+@     local virtualCount = 0
+@     for _, bnd in ipairs(member.binding) do
+@      if bnd.virtual then
+
+/* -------------------------------------------------------------------------------------------- */
+@       virtualCount = virtualCount + 1
+@       local rslt = bnd[1]
+@       local args = bnd[2]
+@       local argOffs = bnd.isFunc and 0 or 1
+@       if not member.fromBase then
+    
+    int @(wrapperClass)::@(member.name)@(virtualCount)_doLua(lua_State* L) 
+    {
+        luaL_checkstack(L, LUA_MINSTACK, nullptr);
+        @(member.name)@(virtualCount)CallArgs* args = (@(member.name)@(virtualCount)CallArgs*)lua_touserdata(L, 1);
+        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
+            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
+            int ehIndex = lua_gettop(L);
+            if (lua_getfield(L, -2, "@(member.name)") != LUA_TNIL) {        // -> uval, eh, member?
+                args->wasImplFound = true;
+@        local hasTempPtr = false
+@        for a, argType in ipairs(args) do
+@            if isTempPtrType(argType) then
+@ 	        if not hasTempPtr then
+@                    hasTempPtr = true
+                int memberIdx = lua_gettop(L);
+@                end
+                ObjectUdata* temp@(a) = args->arg@(a).push(L, NOT_OWNER);
+                int tempIdx@(a) = lua_gettop(L);
+@            end
+@        end
+@ 	if hasTempPtr then
+                lua_pushvalue(L, memberIdx);
+@        end
+@        for a, argType in ipairs(args) do
+@            if isOneOf(argType, "int", "double", "bool", "QString", "const char*") or isEnum(argType) or isFlag(argType) then
+                args->arg@(a).push(L);
+@            elseif isTempPtrType(argType) then
+                lua_pushvalue(L, tempIdx@(a));
+@            elseif isPtrType(argType) then
+                args->arg@(a).push(L, NOT_OWNER);
+@            elseif isClass(argType) then
+                args->arg@(a).push(L, IS_OWNER);
+@            else
+@                errorf("unsupported arg type %q", argType)
+@            end
+@        end
+                args->wasCalled = true;
+                int rc = lua_pcall(L, @(#args), @(rslt == "void" and "0" or "1"), ehIndex);
+@        for a, argType in ipairs(args) do
+@            if isTempPtrType(argType) then
+                temp@(a)->invalidate(L, tempIdx@(a));
+@            end
+@        end
+                if (rc == LUA_OK) {
+                    args->callReturned = true;
+                } else {
+                    return lua_error(L);
+                }
+@        if rslt ~= "void" then
+@            if isOneOf(rslt, "int", "double", "bool", "QString") then
+                args->hasValidResult = args->rslt.test(L, -1);
+@            elseif isPtrType(rslt) then
+@                if isNullablePtrType(rslt) then
+                if (lua_isnil(L, -1)) {
+                    args->hasValidResult = true;
+@                end
+                } else {
+                    args->hasValidResult = args->rslt.test(L, -1);
+@                if isNullablePtrType(rslt) then
+                }
+@                end
+@            elseif isClass(rslt) then
+                if (args->rsltPtr.test(L, -1)) {
+                    args->rslt = *args->rsltPtr;
+                    args->hasValidResult = true;
+                } else {
+                    args->hasValidResult = false;
+                }
+@            else
+@                errorf("unsupported result type %q for method %q", rslt, member.name)
+@            end
+@        end
+            }
+        }
+        return 0;
+    }
+
+@       end
+@       local closeDecl = bnd.const and cb.." const" 
+@                                    or cb
+    @(toCType(rslt)) @(wrapperClass)::@(member.name)(@(#args == argOffs and closeDecl or "")
+@       for a = argOffs + 1, #args do
+@           local argType = args[a]
+                   @(toCTypeForOverride(argType)) arg@(a)@(a < #args and "," or closeDecl) 
+@       end
+    {
+@ if needsValidityCheck then
+        lqtk_checkValidity();
+@ end
+        lua_State* L = getL();
+        if (L) {
+@       if member.fromBase then
+            @(member.fromClass)Wrapper::@(member.name)@(virtualCount)CallArgs args(
+@       else
+            @(member.name)@(virtualCount)CallArgs args(
+@       end
+@       if bnd.const then
+                    const_cast<@(wrapperClass)*>(this)@(#args == argOffs and "" or ",")
+
+@       else
+                    this@(#args == argOffs and "" or ",")
+@       end
+@       for a = argOffs + 1, #args do
+                    arg@(a)@(a < #args and "," or "") 
+@       end
+            );
+            {
+@       if member.fromBase then
+                BindingUtil::callLuaMethodImpl(L, @(member.fromClass)Wrapper::@(member.name)@(virtualCount)_doLua, &args, "@(className)", "@(member.name)");
+@       else
+                BindingUtil::callLuaMethodImpl(L, @(member.name)@(virtualCount)_doLua, &args, "@(className)", "@(member.name)");
+@       end
+            }
+            if (args.wasCalled) {
+@       if rslt == "void" then
+                return;
+@       else
+                if (args.hasValidResult) {
+                    return args.rslt;
+                } else {
+@           if rslt == "int" then
+                    const char* msg = "an integer";
+@           elseif rslt == "double" then
+                    const char* msg = "a number";
+@           elseif rslt == "bool" then
+                    const char* msg = "a boolean value";
+@           elseif rlst == "QString" then
+                    const char* msg = "a string";
+@           elseif isPtrType(rslt) or isClass(rslt) then
+                    const char* msg = "an object of type '@(rslt)'";
+@           else errorf("unsupported rsltType %q", rslt)
+@           end
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "@(className)", "@(member.name)", msg);
+                }
+@       end
+            }
+        }
+@       if not bnd.abstract then
+        return @(wrapperBase)::@(member.name)(@(#args == argOffs and cb..";" or "")
+@        for a = argOffs + 1, #args do
+                    arg@(a)@(a < #args and "," or cb..";") 
+@        end
+@       else
+        throw std::runtime_error("method '@(className):@(member.name)' not implemented");
+@       end
+    }
+@      end
+@     end
+@   end
+@ end
+
+} // namespace lqtk
+@ end
+
+/* ============================================================================================ */
+@ 
+@ if #allDefs > 1 then
+
+extern "C" {
+@  for _, func in ipairs(functions) do
+@   if func.forLuaCallFromBase then
+    int lqtk_@(func.forLuaCallFromClass)_@(func.name)(lua_State* L);
+@   end
+@  end
+}
+
+/* ============================================================================================ */
+@ end
+@
+@ ---------------------------------------------------------------------------------------------------------------------
+@ local function implementFunction(func)
+@
+@  local isCritical, fromLuaTypes, toLuaTypes, argNameMap = calcBindingArgs(func.binding or func.delegate)
+@
+
+struct lqtk_@(className)_@(func.name)_Args
+{
+@  if isCritical and func.name == "new" then
+    explicit lqtk_@(className)_@(func.name)_Args(bool explicitNew)
+        : explicitNew(explicitNew)
+    {}
+    bool explicitNew;
+@  end
+@  for idx, tp in ipairs(fromLuaTypes) do
+@   for c = 1, tp.maxCount do
+@    if tp.name == "QString" then
+    FromLua<@(tp.name)> arg_@(idx)_@(c);
+@    elseif isClass(tp.name) then
+    FromLua<@(tp.name)*> arg_@(idx)_@(c);
+@    else
+    FromLua<@(tp.name)> arg_@(idx)_@(c);
+@    end
+@   end
+@  end
+@  for idx, tp in ipairs(toLuaTypes) do
+@    if tp.name == "QString" then
+    ToLua<@(tp.name)> rslt_@(idx);
+@    elseif isClass(tp.name) then
+    ToLua<@(tp.name)*> rslt_@(idx);
+@    else
+    ToLua<@(tp.name)> rslt_@(idx);
+@    end
+@  end
+};
+
+@ if isCritical then
+static int lqtk_@(className)_@(func.name)_doLua(lua_State* L)
+@ else
+@  if func.name == "new" then
+extern "C" int lqtk_@(className)_constructor(lua_State* L, bool explicitNew)
+@  else
+extern "C" int lqtk_@(className)_@(func.name)(lua_State* L)
+@  end
+@ end
+{
+@ if isCritical then
+    lqtk_@(className)_@(func.name)_Args* args = (lqtk_@(className)_@(func.name)_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+@  if func.name == "new" then
+    bool explicitNew = args->explicitNew;
+@  end
+@ else
+    lqtk_@(className)_@(func.name)_Args  argValues;
+    lqtk_@(className)_@(func.name)_Args* args = &argValues;
+@ end
+    try {
+        int argOffs = 0;
+@ local argOffs = 0
+@ if func.name == "new" then
+        int nargs = lua_gettop(L) - 1;
+        ObjectUdata* udata = ObjectUdata::checkArg(L, 1, ObjectUdata::INITIAL);
+
+        if (udata->classInfo != &@(className)Binding::classInfo)
+        {
+            return util::argError(L, 1, "initial object of type lqtk.Object<@(className)> expected");
+        }
+
+        lua_pushvalue(L, 1); // -> objUdata
+
+        if (explicitNew) {
+            argOffs = 1;
+        } else {
+            lua_remove(L, 1);
+        }
+@ else
+        int nargs = lua_gettop(L);
+@ end        
+@ for _, def in ipairs(allDefs) do
+@    if hasInterceptor(def, func.name) then
+
+        @(def.class)Binding::intercept_@(func.name)();
+
+@    end
+@ end
+@ local binding = func.binding
+@ for b, bind in ipairs(binding) do
+@   local rsltType = bind[1]
+@   local argTypes = bind[2]
+@   local checkIdx = bind.checkIdx
+@   local checkNow = checkIdx and (checkIdx == b)
+@   local function funcArgs(offs)
+@       offs = offs or 0
+@       local rslt = { "(" }
+@       for a = offs + 1, #argTypes do
+@           local argType = argTypes[a]
+@           local p = argType ~= "QString" and isClass(argType) and "*" or ""
+@           if a < #argTypes then
+@               rslt[#rslt+1] = format("%sargs->%s.getValue(), ", p, argNameMap[b][a])
+@           else
+@               rslt[#rslt+1] = format("%sargs->%s.getValue()",   p, argNameMap[b][a])
+@           end
+@       end
+@       rslt[#rslt+1] = ")"
+@       return table.concat(rslt)
+@   end
+@   local function methodArgs()
+@       return funcArgs(1)
+@   end
+        if (nargs == @(#argTypes)) { do {
+@   for a, argType in ipairs(argTypes) do
+@     local argName = argNameMap[b][a]
+@     if isNullablePtrType(argType) then
+          if (!lua_isnil(L, argOffs+@(a))) {
+@     end
+@     if checkNow then
+            args->@(argName).check(L, argOffs+@(a));
+@     else
+            if (!args->@(argName).test(L, argOffs+@(a))) break;
+@     end
+@     if isNullablePtrType(argType) then
+          }
+@     end
+@   end
+            {
+@--   if not onlyWrapped and (func.virtual or (bind.isMethod and isExternalWrapperBase)) then
+@     if bind.protected then
+                @(BINDING)ExportWrapper* wrapper = dynamic_cast<@(BINDING)ExportWrapper*>(args->@(argNameMap[b][1]).getValue());
+@       if bind.protected then
+                if (!wrapper) {
+                    return util::argError(L, 1, "method '@(func.name)' is protected in @(className)");
+                }
+@       end
+@   end
+@   local constructClass
+@   if func.name == "new" then
+@       constructClass = wrapperClass or className 
+                @(constructClass)* rslt = 
+@   elseif rsltType == "void" or rsltType == "this" then
+@   elseif rsltType == "QString" then
+                args->@(argNameMap[b][0]) = 
+@   elseif rsltType == "int" then
+                args->@(argNameMap[b][0]) = 
+@   elseif rsltType == "bool" then
+                args->@(argNameMap[b][0]) = 
+@   elseif isEnum(rsltType) then
+                args->@(argNameMap[b][0]) =
+@   elseif isPtrType(rsltType) and isQObject(getPtrElementType(rsltType)) then
+                args->@(argNameMap[b][0]) =
+@   else
+                args->@(argNameMap[b][0]) = 
+@   end
+@   if func.name == "new" then
+                    new @(constructClass)@(funcArgs());
+@   elseif bind.isMethod and not bind.isDelegate then
+@    if bind.protected then
+                    wrapper->lqtk_@(BINDING)_@(func.name)@(methodArgs());
+@    else
+                    args->@(argNameMap[b][1]).getValue()->@(className)::@(func.name)@(methodArgs());
+@    end
+@   else
+@    assert(bind.isFunc or bind.isDelegate)
+@    if bind.isDelegate then
+                    @(func.forLuaCallFromClass)Binding::delegate_@(func.name)@(funcArgs());
+@    else
+                    @(className)::@(func.name)@(funcArgs());
+@    end
+@   end
+@   for a, argType in ipairs(argTypes) do
+@    if isOwnershipTransferPtrType(argType) then
+                args->@(argNameMap[b][a]).unsetOwnership();
+@    end
+@   end
+@   if func.name == "new" then
+@       local cast = thisDef.onlyWrapped and "("..wrapperBase.."*)" or wrapperClass and "("..className.."*)" or ""
+                if (!rslt) {
+                    return luaL_error(L, "memory error");
+                }
+@       if thisDef.needsGuard then
+                udata->setObjectGuard(L, -1, rslt->lqtk_initObjectGuard(@(cast)rslt),
+                                             IS_OWNER);
+@       elseif isQObject(className) then
+                udata->setQObjectPtr(L, -1, rslt, IS_OWNER);
+@       else
+                udata->setRawPtr(L, -1, @(cast)rslt, IS_OWNER);               // -> udata
+@       end
+                return 1;
+@   elseif rsltType == "void" then
+                return 0;
+@   elseif rsltType == "this" then
+@       assert(bind.isMethod)
+                lua_pushvalue(L, argOffs+1);
+                return 1;
+@   elseif isOneOf(rsltType, "QString", "int", "double", "bool", "const char*") or isEnum(rsltType) or isFlag(rsltType) then
+                args->@(argNameMap[b][0]).push(L);
+                return 1;
+@   elseif isPtrType(rsltType) then
+@       local ownerType = isOwnershipTransferPtrType(rsltType) and "IS_OWNER" or "NOT_OWNER"
+                args->@(argNameMap[b][0]).push(L, @(ownerType));
+                return 1;
+@   elseif rsltType == "QStringList" then
+                args->@(argNameMap[b][0]).push(L);
+                return 1;
+@   elseif isQlistPtrType(rsltType) then
+@       local ownerType = isOwnershipTransferPtrType(getQlistElementType(rsltType)) and "IS_OWNER" or "NOT_OWNER"
+                args->@(argNameMap[b][0]).push(L, @(ownerType));
+                return 1;
+@   elseif isQlistType(rsltType) then
+                args->@(argNameMap[b][0]).push(L);
+                return 1;
+@   elseif isClass(rsltType) then
+                args->@(argNameMap[b][0]).push(L, IS_OWNER);
+                return 1;
+@   elseif isFlag(rsltType.."s") then
+                args->@(argNameMap[b][0]).push(L);
+                return 1;
+@   else
+@       errorf("unsupported result type %q", rsltType)
+@   end
+            }
+        } while (false); }
+@  if not checkNow and bind.checkArgs then
+        if (nargs == @(#argTypes)) {
+@   local checkIdx = bind.checkIdx
+@   local chkBnd = binding[checkIdx]
+@   local chkdArgTypes = chkBnd[2]
+@   assert(#chkdArgTypes == #argTypes)
+@   for a, argType in ipairs(chkdArgTypes) do
+@     local argName = argNameMap[checkIdx][a]
+@     if isNullablePtrType(argType) then
+          if (!lua_isnil(L, argOffs+@(a))) {
+@     end
+            args->@(argName).check(L, argOffs+@(a));
+@     if isNullablePtrType(argType) then
+          }
+@     end
+@   end
+            assert(false);
+        }
+@  end        
+@ end
+@       if func.name == "new" then
+        if (explicitNew) {
+            return util::argCountError(L, "@(className)", "new", nargs, "@(func.expectedArgCountPlus1)");
+        } else {
+            return util::argCountError(L, "@(className)", nullptr, nargs, "@(func.expectedArgCount)");
+        }
+@       else            
+        return util::argCountError(L, "@(className)", "@(func.name)", nargs, "@(func.expectedArgCount)");
+@       end
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+@ if isCritical then
+
+@  if func.name == "new" then
+extern "C" int lqtk_@(className)_constructor(lua_State* L, bool explicitNew)
+@  else
+extern "C" int lqtk_@(className)_@(func.name)(lua_State* L)
+@  end
+{
+    try {
+@  if func.name == "new" then
+        lqtk_@(className)_@(func.name)_Args args(explicitNew);
+@  else
+        lqtk_@(className)_@(func.name)_Args args;
+@  end
+        return BindingUtil::callMethodFromLua(L, lqtk_@(className)_@(func.name)_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+@ end
+@end
+@ ---------------------------------------------------------------------------------------------------------------------
+@ for _, func in ipairs(functions) do
+@   if not func.abstract then
+@    if (not func.forLuaCallFromBase) and func.binding then
+
+@      implementFunction(func)
+
+/* ============================================================================================ */
+@    elseif not func.forLuaCallFromBase then
+
+extern "C" int lqtk_@(className)_@(func.name)(lua_State* L);
+
+/* ============================================================================================ */
+@    end
+@   end
+@ end
+
+static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
+{
+    if (objectPtr)
+    {
+        @(BINDING)Binding::QType* ptr = static_cast<@(BINDING)Binding::QType*>(objectPtr);
+        if (targetClassInfo == &@(BINDING)Binding::classInfo) {
+            return ptr;
+        }
+@ for b = 2, #allDefs do
+@   local def = allDefs[b]
+        if (targetClassInfo == &@(def.class)Binding::classInfo) {
+            return static_cast<@(def.class)Binding::QType*>(ptr);
+        }
+@ end
+    }
+    return NULL;
+}
+
+/* ============================================================================================ */
+
+static void deleteFunction(void* objectPtr)
+{
+    if (objectPtr) {
+        @(className)* ptr = (@(className)*) objectPtr;
+        delete ptr;
+    }
+}
+
+@ if thisDef.needsOwnerCheck then
+/* ============================================================================================ */
+
+static bool hasParentFunction(void* objectPtr)
+{
+    return @(className)Binding::hasOwner((@(className)*)objectPtr);
+}
+
+@ end
+@ if needsValidityCheck then
+/* ============================================================================================ */
+
+static const char* validityErrorFunction(void* objectPtr)
+{
+    if (objectPtr) {
+@   if onlyWrapped then
+        @(className)WrapperBase* wrapper = (@(className)WrapperBase*) objectPtr;
+        return wrapper->lqtk_validityError();
+@   else
+        @(className)* obj = (@(className)*) objectPtr;
+        @(wrapperClass)* wrapper = dynamic_cast<@(wrapperClass)*>(obj);
+        if (wrapper) {
+            return wrapper->lqtk_validityError();
+        }
+@   end
+    }
+    return nullptr;
+}
+
+@ end
+@ if hasVirtualMembers then
+/* ============================================================================================ */
+
+static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
+{
+    if (objectPtr) {
+        @(className)* obj = (@(className)*) objectPtr;
+        
+        @(wrapperClass)* wrapper = dynamic_cast<@(wrapperClass)*>(obj);
+        if (wrapper) {
+            wrapper->lqtk_stateGuard = StateGuard::acquireRef(guard, StateGuard::FOR_QT_OBJECT);
+            return true;
+        }
+    }
+    return false;
+}
+
+@ end
+/* ============================================================================================ */
+@ if constructor then
+
+@    if constructor.binding then
+@      implementFunction(constructor)
+@    else
+extern "C" int lqtk_@(className)_constructor(lua_State* L, bool explicitNew);
+@    end
+
+/* ============================================================================================ */
+
+extern "C" int lqtk_@(className)_new(lua_State* L)
+{
+    return lqtk_@(className)_constructor(L, true /*explicitNew*/);
+}
+
+/* ============================================================================================ */
+@ end
+
+@if not onlyWrapped then
+ObjectUdata* @(className)Binding::pushObject(lua_State* L, @(className)* objPtr, OwnerType ownerType)
+{
+@ if thisDef.polymorphic ~= false then
+@ if wrapperClass then
+    @(wrapperClass)* wrapper = dynamic_cast<@(wrapperClass)*>(objPtr);
+@ end
+@ local derivedClasses = getDerivedClasses()
+@ if #derivedClasses > 0 then
+@  if wrapperClass then
+    if (!wrapper) {
+@  end
+@  for i, d in ipairs(derivedClasses) do
+@   local b = getBinding(d)
+        @(d)* ptr@(i) = dynamic_cast<@(d)*>(objPtr);
+        if (ptr@(i)) {
+            return @(d)Binding::pushObject(L, ptr@(i), ownerType);
+        }
+@  end
+@  if wrapperClass then
+    }
+@  end
+@ end
+@ if thisDef.needsGuard then
+@  if wrapperClass then
+    if (!wrapper) {
+@  end
+        luaL_error(L, "object of type '%s' cannot be bound to lua", classInfo.className);
+        return NULL;
+@  if wrapperClass then
+    }
+@  end
+@ end
+@ end
+@if not (thisDef.needsGuard and not wrapperClass) then
+    StateGuard::pushWeakUdataRef(L, objPtr);                             // -> udata?
+    ObjectUdata* udata = ObjectUdata::testArg(L, -1);  
+                                                                         // -> udata?
+    if (!udata || udata->classInfo != &classInfo  
+               || udata->getObjectPtr() != objPtr)
+    {                                                                    // -> xxx
+        lua_pop(L, 1);                                                   // -> 
+        bool hasUserValue = false;
+        if (StateGuard::pushWeakUserValue(L, objPtr) == LUA_TTABLE) {    // -> uval?
+            hasUserValue = true;
+        }
+        udata = ObjectUdata::pushNew<@(className)>(L, hasUserValue);     // -> uval?, udata
+@ if thisDef.needsGuard then
+        udata->setObjectGuard(L, -1, wrapper->lqtk_getObjectGuard(),
+                                     ownerType);
+@ elseif isQObject(className) then
+        udata->setQObjectPtr(L, -1, objPtr, ownerType);
+@ else
+        udata->setRawPtr(L, -1, objPtr, ownerType);                      // -> uval?, udata
+@ end
+        if (hasUserValue) {
+            udata->setUserValue(L, -1, -2);                              // -> uval,  udata, 
+        }                                                                // -> uval?, udata
+        lua_remove(L, -2);                                               // -> udata
+    }                                                                    // -> udata
+    return udata;
+@end
+}
+
+/* ============================================================================================ */
+@end
+@
+@ if constructorProxy then
+@   local cb = ")"
+@   for _, bnd in ipairs(constructorProxy) do
+@     local args = bnd[2]
+
+@(BINDING)WrapperBase* @(BINDING)Binding::createWrappedObject(@(#args == 0 and cb or "")
+@     for i, a in ipairs(args) do
+                            @(a) arg@(i)@(i == #args and cb or ",")
+@     end
+{
+@     local cb = ");"
+    return new @(BINDING)Wrapper(@(#args == 0 and cb or "")
+@     for i, a in ipairs(args) do
+                            arg@(i)@(i == #args and cb or ",")
+@     end
+}
+@   end
+
+/* ============================================================================================ */
+@ end
+
+static const Member members[] =
+{
+@ local function pad(m)
+@  return m..","..string.rep(" ", maxMemberNameLength + 2 - #m)
+@ end
+@ local memberCount = #members
+@ for _, member in ipairs(members) do
+@   if     member.type == "int"  then
+    { @(pad('"'..member.name..'"')) Member::INTEGER,              (void*) @(className)::@(member.name) },
+@   elseif (member.type == "func" or member.type == "method") and not member.abstract and not member.virtual then
+    { @(pad('"'..member.name..'"')) Member::NORMAL_FUNCTION,      (void*) lqtk_@(member.forLuaCallFromClass)_@(member.name) },
+@   elseif (member.type == "func" or member.type == "method") and not member.abstract and     member.virtual then
+    { @(pad('"'..member.name..'"')) Member::VIRTUAL_FUNCTION,     (void*) lqtk_@(member.forLuaCallFromClass)_@(member.name) },
+@   elseif (member.type == "func" or member.type == "method") and member.abstract then
+@       memberCount = memberCount - 1
+@   else   
+@     errorf("unexpected type %s for %s", member.type, member.name)
+@   end
+@ end
+    { @(pad("NULL")               ) Member::NONE,                 NULL } /* sentinel */
+};
+
+/* ============================================================================================ */
+
+const ClassInfo @(className)Binding::classInfo = 
+{
+    "@(className)",
+
+@ if thisDef.baseClass then
+    &@(thisDef.baseClass)Binding::classInfo,
+@ else
+    NULL,
+@ end
+
+@ if isQObject(className) then
+    true,  // isQObject
+@ else
+    false, // isQObject
+@end
+@ if thisDef.needsGuard then
+    true,  // needsGuard
+@ else
+    false, // needsGuard
+@end
+@ if constructor then
+    lqtk_@(className)_constructor,
+    lqtk_@(className)_new,
+@ else
+    NULL, // constructFunc
+    NULL, // newFunc
+@ end
+    castFunction,
+    deleteFunction,
+@ if thisDef.needsOwnerCheck then
+    hasParentFunction,
+@ else
+    NULL, // hasParentFunction
+@ end
+@ if needsValidityCheck then
+    validityErrorFunction,
+@ else
+    NULL, // validityErrorFunction
+@ end
+@ if hasVirtualMembers then
+    setUserValueFunction,
+@ else
+    NULL, // setUserValueFunction
+@ end
+    @(memberCount),
+    members
+};
+
+/* ============================================================================================ */
+
+int @(className)Binding::pushBinding(lua_State* L)
+{
+    return ClassUdata::pushBinding(L, &classInfo);
+}
+
+/* ============================================================================================ */

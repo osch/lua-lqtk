@@ -1,0 +1,50 @@
+/* ============================================================================================ */
+
+#include <@(namespaceName)>
+
+#include "init.h"
+#include "util.hpp"
+
+#include "NamespaceInfo.hpp"
+#include "NamespaceUdata.hpp"
+#include "@(namespaceName)Binding.hpp"
+
+using namespace lqtk;
+
+/* ============================================================================================ */
+
+static const Member members[] =
+{
+@ local function pad(m)
+@  return m..","..string.rep(" ", maxMemberNameLength + 2 - #m)
+@ end
+@ local memberCount = #members
+@ for _, member in ipairs(members) do
+@   if     member.type == "int"  then
+    { @(pad('"'..member.name..'"')) Member::INTEGER,  (void*) @(namespaceName)::@(member.name) },
+@   elseif member.type == "func" then
+    { @(pad('"'..member.name..'"')) Member::FUNCTION, (void*) lqtk_@(member.fromClass)_@(member.name) },
+@   else   
+@     errorf("unexpected type %s", member.type)
+@   end
+@ end
+    { @(pad("NULL")) Member::NONE,     NULL } /* sentinel */
+};
+
+/* ============================================================================================ */
+
+const NamespaceInfo @(namespaceName)Binding::namespaceInfo = 
+{
+    "@(namespaceName)",
+    
+    @(memberCount),
+    members
+};
+
+
+/* ============================================================================================ */
+
+int @(namespaceName)Binding::pushBinding(lua_State* L)
+{
+    return NamespaceUdata::pushBinding(L, &namespaceInfo);
+}

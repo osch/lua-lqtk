@@ -1,0 +1,199 @@
+#ifndef LQTK_@(BINDING)_WRAPPER_HPP
+#define LQTK_@(BINDING)_WRAPPER_HPP
+
+#include "BindingUtil.hpp"
+@ if isExternalWrapperBase then
+#include "@(wrapperBase).hpp"
+@ end
+
+namespace lqtk
+{
+@ assert(needsWrapperClass)
+@ local cb = ")"
+@ if hasProtectedMethods(BINDING) then
+
+class @(BINDING)ExportWrapper
+{
+public:
+@   for _, member in ipairs(virtualMembers) do
+@    if member.fromClass == BINDING then
+@     for _, bnd in ipairs(member.binding) do
+@       if bnd.virtual then
+@         local rslt = bnd[1]
+@         local args = bnd[2]
+@         local argOffs = bnd.isFunc and 0 or 1
+@         if not bnd.abstract and bnd.protected then
+    virtual @(toCType(rslt)) lqtk_@(BINDING)_@(member.name)(@(#args == argOffs and cb.." = 0;" or "")
+@           for i = argOffs + 1, #args do
+@             local a = args[i]
+                   @(toCType(a)) arg@(i)@(i < #args and "," or cb.." = 0;") 
+@           end
+@         end
+@       end
+@     end
+@    end
+@   end
+};
+@ end
+
+class @(wrapperClass) : public @(wrapperBase)
+@ for _, b in ipairs(baseClasses) do
+@   if hasProtectedMethods(b) then
+                      , public @(b)ExportWrapper
+@   end
+@ end
+@ if thisDef.needsGuard then
+                      , public ObjectGuard::Holder<@(className)>
+@ end
+{
+public:
+@ local cnstr = constructor and constructor.binding or constructorProxy
+@ if cnstr then
+
+/* -------------------------------------------------------------------------------------------- */
+
+@ for _, bnd in ipairs(cnstr) do
+@   local args = bnd[2]
+    @(wrapperClass)(@(#args == 0 and cb..";" or "")
+@   for i, a in ipairs(args) do
+@       if isPtrType(a) and isOnlyWrapped(getPtrElementType(a)) then
+                   @(getPtrElementType(a))WrapperBase* arg@(i)@(i < #args and "," or cb..";") 
+@       else
+                   @(toCType(a)) arg@(i)@(i < #args and "," or cb..";") 
+@       end
+@   end
+@ end
+@ end
+
+/* -------------------------------------------------------------------------------------------- */
+
+@ if hasVirtualMembers then
+private:
+    static int lqtk_destruct(lua_State* L);
+public:
+@ end
+    ~@(wrapperClass)();
+
+@ if thisDef.needsGuard then
+    ObjectGuard* lqtk_getObjectGuard() const {
+        return ObjectGuard::Holder<@(className)>::lqtk_getObjectGuard();
+    }
+@ end
+
+@ if needsValidityCheck then
+
+/* -------------------------------------------------------------------------------------------- */
+
+    void lqtk_checkValidity() const {
+        const char* err = @(wrapperBase)::lqtk_validityError();
+        if (err) {
+            throw std::runtime_error(err);
+        }
+    }
+@ end    
+@ for _, bname in ipairs(baseClasses) do
+@   if needsWrapper(bname) then
+@     local b = getBinding(bname)
+@     for _, member in ipairs(b.elements) do
+@       if member.method and member.binding then
+@         for _, bnd in ipairs(member.binding) do
+@           if not bnd.abstract and bnd.protected then
+@             local rslt = bnd[1]
+@             local args = bnd[2]
+    @(toCType(rslt)) lqtk_@(b.class)_@(member.method)(@(#args == 0 and cb.." override;" or "")
+@             for i = 1, #args do
+@               local a = args[i]
+                   @(toCType(a)) arg@(i)@(i < #args and "," or cb.." override;") 
+@             end
+@           end
+@         end
+@       end
+@     end
+@   end
+@ end
+@ if hasVirtualMembers then
+@   for _, member in ipairs(virtualMembers) do
+@     local virtualCount = 0
+@     for _, bnd in ipairs(member.binding) do
+@       if bnd.virtual then
+
+/* -------------------------------------------------------------------------------------------- */
+@         virtualCount = virtualCount + 1
+@         local rslt = bnd[1]
+@         local args = bnd[2]
+@         local argOffs = bnd.isFunc and 0 or 1
+@         if not member.fromBase then
+public:
+    struct @(member.name)@(virtualCount)CallArgs : BindingUtil::CallArgs {
+        @(member.name)@(virtualCount)CallArgs(
+                @(className)* thiz@(#args == argOffs and cb or ",")
+@          local cb = ")"
+@          for a = argOffs + 1, #args do
+@              local argType = args[a]
+                    @(toCType(argType)) arg@(a)@(a < #args and "," or cb) 
+@          end
+              : BindingUtil::CallArgs(thiz),
+@          if rslt ~= "void" then
+                hasValidResult(false),
+@          end
+                arg1(thiz)@(#args == argOffs and "" or ",")
+@          for a = argOffs + 1, #args do
+@            local argType = args[a]
+                arg@(a)(arg@(a))@(a < #args and "," or "") 
+@          end
+        {}
+
+@          if rslt ~= "void" then
+        bool hasValidResult;
+@            if isClass(rslt) then
+        FromLua<@(toCType(rslt))*> rsltPtr;
+        @(toCType(rslt)) rslt;
+@            else
+        FromLua<@(toCType(rslt))> rslt;
+@            end
+@          end
+        ToLua<@(className)*> arg1;
+@          for a = argOffs + 1, #args do
+@            local argType = args[a]
+@            if isClass(argType) then
+        ToLua<@(toCType(argType))*> arg@(a);
+@            else
+        ToLua<@(toCType(argType))> arg@(a);
+@            end
+@          end
+    };
+    
+    static int @(member.name)@(virtualCount)_doLua(lua_State* L);
+@         end
+public:
+@       local closeDecl = bnd.const and cb.." const override;" 
+@                                    or cb.." override;"
+    @(toCType(rslt)) @(member.name)(@(#args == argOffs and closeDecl or "")
+@       for a = argOffs + 1, #args do
+@           local argType = args[a]
+                   @(toCTypeForOverride(argType)) arg@(a)@(a < #args and "," or closeDecl) 
+@       end
+@      end
+@     end
+@   end
+@ end
+@ if hasVirtualMembers then
+
+/* -------------------------------------------------------------------------------------------- */
+
+private:
+    lua_State* getL() const {
+        if (lqtk_stateGuard) {
+            return lqtk_stateGuard->L;
+        } else {
+            return nullptr;
+        }
+    }
+public:
+    StateGuard* lqtk_stateGuard;
+@ end
+};
+
+} // namespace lqtk
+
+#endif // LQTK_@(BINDING)_WRAPPER_HPP

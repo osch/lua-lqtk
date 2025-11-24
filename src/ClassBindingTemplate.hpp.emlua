@@ -1,0 +1,78 @@
+#ifndef LQTK_@(BINDING)Binding_HPP
+#define LQTK_@(BINDING)Binding_HPP
+
+#include "util.hpp"
+#include "OwnerType.hpp"
+#include "Binding.hpp"
+@ if thisDef.needsGuard then
+#include "ObjectGuard.hpp"
+@ end
+@ if (thisDef.onlyWrapped or constructorProxy) and isExternalWrapperBase then
+#include "@(wrapperBase).hpp"
+@end
+
+namespace lqtk
+{
+
+class ObjectUdata;
+
+struct @(BINDING)Binding
+{
+@ if thisDef.onlyWrapped then
+    typedef @(wrapperBase) QType;
+@ else
+    typedef @(BINDING) QType;
+@ end
+@ 
+@ if constructorProxy then
+@   local cb = ");"
+@   for _, bnd in ipairs(constructorProxy) do
+@     local args = bnd[2]
+
+    static @(BINDING)WrapperBase* createWrappedObject(@(#args == 0 and cb or "")
+@     for i, a in ipairs(args) do
+                            @(a) arg@(i)@(i == #args and cb or ",")
+@     end    
+@   end
+@ end
+@ for _, func in ipairs(getDelegateOrInterceptedFuncs(BINDING)) do
+@  local prefix = func.isDelegate and "delegate" or "intercept"
+@  for _, bnd in ipairs(func.binding) do
+@   local rsltType = func.isDelegate and toCType(bnd[1]) or "void"
+@   local args = bnd[2]
+@   local cb = ");"
+
+    static @(rsltType) @(prefix)_@(func.name)(@(#args == 0 and cb or "")
+@   for i = 1, #args do
+@       local a = args[i]
+@       if isPtrType(a) then
+@         local tp = getPtrElementType(a)
+@         local b = getBinding(tp)
+@         if b.onlyWrapped then
+@           a = tp.."WrapperBase*"
+@         end
+@       end
+                    @(a) arg@(i)@(i == #args and cb or ",")
+@   end    
+@  end
+@ end
+@ if thisDef.needsGuard then
+
+    static bool hasOwner(QType* obj);
+@ end
+
+@ if not thisDef.onlyWrapped then    
+    static ObjectUdata* pushObject(lua_State* L, QType* obj, OwnerType ownerType);
+@ end
+
+    static const ClassInfo classInfo;
+    
+    static int pushBinding(lua_State* L);
+};
+
+template<> struct Binding<@(BINDING)> : public @(BINDING)Binding
+{};
+
+} // namespace lqtk
+
+#endif // LQTK_@(BINDING)Binding_HPP

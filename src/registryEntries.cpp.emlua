@@ -1,0 +1,58 @@
+/* ============================================================================================ */
+
+#include "init.h"
+
+/* ============================================================================================ */
+
+namespace lqtk
+{
+@ table.sort(BINDINGS)
+@ local maxNameLength = 0
+@ for _, qName in ipairs(BINDINGS) do
+@  if #qName > maxNameLength then
+@   maxNameLength = #qName
+@  end
+@ end
+
+@ for _, qName in ipairs(BINDINGS) do
+    struct @(qName)Binding { static int pushBinding(lua_State* L); };
+@ end
+
+namespace registry
+{
+    extern const luaL_Reg entries[];
+    
+    void pushEntryKeyValue(lua_State* L, int i);
+    
+    int getEntryCount();
+}
+
+const luaL_Reg registry::entries[] =
+{
+@ local function pad(n)
+@  return n..","..string.rep(" ", maxNameLength + 2 - #n)
+@ end
+@ for _, qName in ipairs(BINDINGS) do
+        { @(pad('"'..qName..'"')) @(qName)Binding::pushBinding },
+@ end
+        { @(pad("NULL")) NULL }
+};
+
+
+void registry::pushEntryKeyValue(lua_State* L, int i)
+{
+    if (1 <= i && i <= @(#BINDINGS)) {
+        lua_pushstring(L, entries[i-1].name);
+        entries[i-1].func(L);
+    } else {
+        lua_pushnil(L);
+        lua_pushnil(L);
+    }
+}
+
+int registry::getEntryCount()
+{
+    return @(#BINDINGS);
+}
+
+} // namespace lqtk

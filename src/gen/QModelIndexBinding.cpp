@@ -120,7 +120,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QModelIndex_new_Args
 {
     ToLua<QModelIndex*> rslt_1;

@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QPointer>
+#include <QThread>
 
 /* ============================================================================================ */
 
@@ -15,6 +16,8 @@
 #include "registry.hpp"
 #include "QApplicationWrapperBase.hpp"
 #include "QApplicationBinding.hpp"
+#include "QApplicationBinding2.hpp"
+#include "QApplicationWrapper.hpp"
 
 /* ============================================================================================ */
 
@@ -22,7 +25,7 @@ using namespace lqtk;
 
 /* ============================================================================================ */
 
-extern "C" int lqtk_QApplication_constructor(lua_State* L, bool explicitNew)
+int QApplicationBinding2::constructor(lua_State* L, bool explicitNew)
 {
     char** argPtrs = NULL;
     
@@ -55,7 +58,7 @@ extern "C" int lqtk_QApplication_constructor(lua_State* L, bool explicitNew)
         StateGuard* guard = StateGuard::push(L);                           // -> app, guard
         lua_insert(L, -2);                                                 // -> guard, app
 
-        if (QCoreApplication::instance() || guard->qapp) {
+        if (QCoreApplication::instance() || guard->getQApplication()) {
             return luaL_error(L, "QApplication already constructed");
         }
         int nargs = lua_rawlen(L, argOffs+1);
@@ -94,7 +97,7 @@ extern "C" int lqtk_QApplication_constructor(lua_State* L, bool explicitNew)
                 lua_pop(L, 1); // -> 
             }
         }
-        QApplicationWrapperBase* app = QApplicationBinding::createWrappedObject(nargs, argPtrs);
+        QApplicationWrapper* app = new QApplicationWrapper(nargs, argPtrs);
 
         if (!app) {
             free(argPtrs);
@@ -102,7 +105,7 @@ extern "C" int lqtk_QApplication_constructor(lua_State* L, bool explicitNew)
         }
         {                                                                           // -> app
             udata->setQObjectPtr(L, -1, app, NOT_OWNER);                            // -> app
-            guard->qapp = app;
+            guard->setQApplication(app);
         }
         // argc and argv might be changed as Qt removes  
         // command line arguments that it recognizes.
@@ -114,6 +117,9 @@ extern "C" int lqtk_QApplication_constructor(lua_State* L, bool explicitNew)
                 lua_pushnil(L);
             }
             lua_rawseti(L, 1, i);
+        }
+        if (!QThread::isMainThread()) {
+            return luaL_error(L, "not on main thread");
         }
         return 1;
     }

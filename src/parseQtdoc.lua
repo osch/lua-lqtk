@@ -231,8 +231,8 @@ local function parseMethod(line, isProtected, isFunc)
         assert(#rest == 0, rest)
     end
 
-    local protected = not isAbstract and isProtected and true or nil
-    local override = not isProtected and not isAbstract and isOverride and true or nil
+    local protected = isProtected and true or nil
+    local override = isOverride and true or nil
     local abstract = isAbstract and true or nil
 
     local existing1 = funcs[name]
@@ -283,7 +283,7 @@ local lineCount = 0
 
 for line in docContent:gmatch("[^\n]*") do
     lineCount = lineCount + 1
-    line = line:gsub("%s%(since[^)]*%)%s", " ")
+    line = line:gsub("^%(since[^)]*%)%s*", ""):gsub("^%[since[^%]]*%]%s*", ""):gsub("%s%(since[^)]*%)%s", " ")
     --printf("line %d: %q\n", lineCount, line)
     if line:match("^%(since") then
         line = line:match("^%(since[^%)]*%)%s*(.*)$")

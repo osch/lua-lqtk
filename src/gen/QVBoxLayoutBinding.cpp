@@ -80,7 +80,7 @@ namespace lqtk
     QVBoxLayoutWrapper::~QVBoxLayoutWrapper() {
         trace::printf("Deleting lqtk::QVBoxLayoutWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QVBoxLayout* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QVBoxLayout");
@@ -95,12 +95,12 @@ namespace lqtk
     {
         lua_State* L = getL();
         if (L) {
-            QBoxLayoutWrapper::addItem1CallArgs args(
+            QLayoutWrapper::addItem1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QBoxLayoutWrapper::addItem1_doLua, &args, "QVBoxLayout", "addItem");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::addItem1_doLua, &args, "QVBoxLayout", "addItem");
             }
             if (args.wasCalled) {
                 return;
@@ -115,12 +115,12 @@ namespace lqtk
     {
         lua_State* L = getL();
         if (L) {
-            QBoxLayoutWrapper::count1CallArgs args(
+            QLayoutWrapper::count1CallArgs args(
                     const_cast<QVBoxLayoutWrapper*>(this)
 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QBoxLayoutWrapper::count1_doLua, &args, "QVBoxLayout", "count");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::count1_doLua, &args, "QVBoxLayout", "count");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -191,19 +191,19 @@ namespace lqtk
     {
         lua_State* L = getL();
         if (L) {
-            QBoxLayoutWrapper::itemAt1CallArgs args(
+            QLayoutWrapper::itemAt1CallArgs args(
                     const_cast<QVBoxLayoutWrapper*>(this),
 
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QBoxLayoutWrapper::itemAt1_doLua, &args, "QVBoxLayout", "itemAt");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::itemAt1_doLua, &args, "QVBoxLayout", "itemAt");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QLayoutItem*?'";
+                    const char* msg = "an object of type 'QLayoutItem'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QVBoxLayout", "itemAt", msg);
                 }
             }
@@ -217,12 +217,12 @@ namespace lqtk
     {
         lua_State* L = getL();
         if (L) {
-            QBoxLayoutWrapper::sizeHint1CallArgs args(
+            QLayoutWrapper::sizeHint1CallArgs args(
                     const_cast<QVBoxLayoutWrapper*>(this)
 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QBoxLayoutWrapper::sizeHint1_doLua, &args, "QVBoxLayout", "sizeHint");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::sizeHint1_doLua, &args, "QVBoxLayout", "sizeHint");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -242,18 +242,18 @@ namespace lqtk
     {
         lua_State* L = getL();
         if (L) {
-            QBoxLayoutWrapper::takeAt1CallArgs args(
+            QLayoutWrapper::takeAt1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QBoxLayoutWrapper::takeAt1_doLua, &args, "QVBoxLayout", "takeAt");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::takeAt1_doLua, &args, "QVBoxLayout", "takeAt");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QLayoutItem@?'";
+                    const char* msg = "an object of type 'QLayoutItem'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QVBoxLayout", "takeAt", msg);
                 }
             }
@@ -409,7 +409,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QVBoxLayout_new_Args
 {

@@ -14,13 +14,6 @@ struct QRectBinding
 {
     typedef QRect QType;
 
-    static bool delegate_equals(
-                    QRect* arg1,
-                    QRect* arg2);
-
-    static QString delegate_toString(
-                    QRect* arg1);
-
     static ObjectUdata* pushObject(lua_State* L, QType* obj, OwnerType ownerType);
 
     static const ClassInfo classInfo;

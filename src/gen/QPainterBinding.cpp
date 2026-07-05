@@ -52,6 +52,7 @@
 #include "QtBinding.hpp"
 #include "QPainterWrapperBase.hpp"
 #include "QPainterWrapper.hpp"
+#include "QPainterBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -107,7 +108,7 @@ extern "C" int lqtk_QPainter_backgroundMode(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QPainter::backgroundMode();
                 args->rslt_1.push(L);
                 return 1;
@@ -142,9 +143,7 @@ extern "C" int lqtk_QPainter_begin(lua_State* L)
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             if (!args->arg_2_1.test(L, argOffs+2)) break;
             {
-                args->rslt_1 = 
-                    QPainterBinding::delegate_begin(args->arg_1_1.getValue(), args->arg_2_1.getValue());
-                args->rslt_1.push(L);
+                QPainterBinding2::delegate_begin(L, argOffs, 2, &args->rslt_1, args->arg_1_1.getValue(), args->arg_2_1.getValue());
                 return 1;
             }
         } while (false); }
@@ -152,9 +151,7 @@ extern "C" int lqtk_QPainter_begin(lua_State* L)
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             if (!args->arg_3_1.test(L, argOffs+2)) break;
             {
-                args->rslt_1 = 
-                    QPainterBinding::delegate_begin(args->arg_1_1.getValue(), args->arg_3_1.getValue());
-                args->rslt_1.push(L);
+                QPainterBinding2::delegate_begin(L, argOffs, 2, &args->rslt_1, args->arg_1_1.getValue(), args->arg_3_1.getValue());
                 return 1;
             }
         } while (false); }
@@ -285,7 +282,7 @@ extern "C" int lqtk_QPainter_compositionMode(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QPainter::compositionMode();
                 args->rslt_1.push(L);
                 return 1;
@@ -318,7 +315,7 @@ static int lqtk_QPainter_drawConvexPolygon_doLua(lua_State* L)
             args->arg_1_1.check(L, argOffs+1);
             args->arg_2_1.check(L, argOffs+2);
             {
-                    QPainterBinding::delegate_drawConvexPolygon(args->arg_1_1.getValue(), args->arg_2_1.getValue());
+                QPainterBinding2::delegate_drawConvexPolygon(L, argOffs, 2, args->arg_1_1.getValue(), args->arg_2_1.getValue());
                 return 0;
             }
         } while (false); }
@@ -963,9 +960,7 @@ extern "C" int lqtk_QPainter_finish(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 = 
-                    QPainterBinding::delegate_finish(args->arg_1_1.getValue());
-                args->rslt_1.push(L);
+                QPainterBinding2::delegate_finish(L, argOffs, 1, &args->rslt_1, args->arg_1_1.getValue());
                 return 1;
             }
         } while (false); }
@@ -1283,7 +1278,6 @@ static const char* validityErrorFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QPainter_new_Args
 {

@@ -14,13 +14,6 @@ struct QPointBinding
 {
     typedef QPoint QType;
 
-    static bool delegate_equals(
-                    QPoint* arg1,
-                    QPoint* arg2);
-
-    static QString delegate_toString(
-                    QPoint* arg1);
-
     static ObjectUdata* pushObject(lua_State* L, QType* obj, OwnerType ownerType);
 
     static const ClassInfo classInfo;

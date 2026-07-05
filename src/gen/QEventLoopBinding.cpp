@@ -60,7 +60,7 @@ namespace lqtk
     QEventLoopWrapper::~QEventLoopWrapper() {
         trace::printf("Deleting lqtk::QEventLoopWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QEventLoop* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QEventLoop");
@@ -238,7 +238,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QEventLoop_new_Args
 {

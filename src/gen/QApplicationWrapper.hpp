@@ -31,30 +31,8 @@ private:
     static int lqtk_destruct(lua_State* L);
 public:
     ~QApplicationWrapper();
-
-
     bool lqtk_QApplication_event(
                    QEvent* arg1) override; 
-
-/* -------------------------------------------------------------------------------------------- */
-public:
-    struct event1CallArgs : BindingUtil::CallArgs {
-        event1CallArgs(
-                QApplication* thiz,
-                    QEvent* arg2) 
-              : BindingUtil::CallArgs(thiz),
-                hasValidResult(false),
-                arg1(thiz),
-                arg2(arg2) 
-        {}
-
-        bool hasValidResult;
-        FromLua<bool> rslt;
-        ToLua<QApplication*> arg1;
-        ToLua<QEvent*> arg2;
-    };
-    
-    static int event1_doLua(lua_State* L);
 public:
     bool event(
                    QEvent* arg2) override; 
@@ -64,13 +42,16 @@ public:
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
     }
 public:
     StateGuard* lqtk_stateGuard;
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

@@ -109,16 +109,6 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 
 /* ============================================================================================ */
 
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QSizePolicy* ptr = (QSizePolicy*) objectPtr;
-        delete ptr;
-    }
-}
-
-/* ============================================================================================ */
-
 ObjectUdata* QSizePolicyBinding::pushObject(lua_State* L, QSizePolicy* objPtr, OwnerType ownerType)
 {
     StateGuard::pushWeakUdataRef(L, objPtr);                             // -> udata?
@@ -164,7 +154,7 @@ const ClassInfo QSizePolicyBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction

@@ -8,6 +8,7 @@
 #include <QEventLoop>
 #include <QGuiApplication>
 #include <QObject>
+#include <QString>
 
 #include <QPointer>
 #include <stdexcept>
@@ -30,6 +31,7 @@
 #include "QEventLoopBinding.hpp"
 #include "QGuiApplicationBinding.hpp"
 #include "QObjectBinding.hpp"
+#include "QStringBinding.hpp"
 
 /* ============================================================================================ */
 
@@ -51,6 +53,200 @@ extern "C" {
 /* ============================================================================================ */
 
 
+struct lqtk_QCoreApplication_applicationDirPath_Args
+{
+    ToLua<QString> rslt_1;
+};
+
+static int lqtk_QCoreApplication_applicationDirPath_doLua(lua_State* L)
+{
+    lqtk_QCoreApplication_applicationDirPath_Args* args = (lqtk_QCoreApplication_applicationDirPath_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 0) { do {
+            {
+                args->rslt_1 = 
+                    QCoreApplication::applicationDirPath();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QCoreApplication", "applicationDirPath", nargs, "0");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QCoreApplication_applicationDirPath(lua_State* L)
+{
+    try {
+        lqtk_QCoreApplication_applicationDirPath_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QCoreApplication_applicationDirPath_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QCoreApplication_applicationFilePath_Args
+{
+    ToLua<QString> rslt_1;
+};
+
+static int lqtk_QCoreApplication_applicationFilePath_doLua(lua_State* L)
+{
+    lqtk_QCoreApplication_applicationFilePath_Args* args = (lqtk_QCoreApplication_applicationFilePath_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 0) { do {
+            {
+                args->rslt_1 = 
+                    QCoreApplication::applicationFilePath();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QCoreApplication", "applicationFilePath", nargs, "0");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QCoreApplication_applicationFilePath(lua_State* L)
+{
+    try {
+        lqtk_QCoreApplication_applicationFilePath_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QCoreApplication_applicationFilePath_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QCoreApplication_applicationName_Args
+{
+    ToLua<QString> rslt_1;
+};
+
+static int lqtk_QCoreApplication_applicationName_doLua(lua_State* L)
+{
+    lqtk_QCoreApplication_applicationName_Args* args = (lqtk_QCoreApplication_applicationName_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 0) { do {
+            {
+                args->rslt_1 = 
+                    QCoreApplication::applicationName();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QCoreApplication", "applicationName", nargs, "0");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QCoreApplication_applicationName(lua_State* L)
+{
+    try {
+        lqtk_QCoreApplication_applicationName_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QCoreApplication_applicationName_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QCoreApplication_applicationPid_Args
+{
+    ToLua<qint64> rslt_1;
+};
+
+extern "C" int lqtk_QCoreApplication_applicationPid(lua_State* L)
+{
+    lqtk_QCoreApplication_applicationPid_Args  argValues;
+    lqtk_QCoreApplication_applicationPid_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 0) { do {
+            {
+                args->rslt_1 = 
+                    QCoreApplication::applicationPid();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QCoreApplication", "applicationPid", nargs, "0");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QCoreApplication_applicationVersion_Args
+{
+    ToLua<QString> rslt_1;
+};
+
+static int lqtk_QCoreApplication_applicationVersion_doLua(lua_State* L)
+{
+    lqtk_QCoreApplication_applicationVersion_Args* args = (lqtk_QCoreApplication_applicationVersion_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 0) { do {
+            {
+                args->rslt_1 = 
+                    QCoreApplication::applicationVersion();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QCoreApplication", "applicationVersion", nargs, "0");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QCoreApplication_applicationVersion(lua_State* L)
+{
+    try {
+        lqtk_QCoreApplication_applicationVersion_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QCoreApplication_applicationVersion_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
 struct lqtk_QCoreApplication_instance_Args
 {
     ToLua<QCoreApplication*> rslt_1;
@@ -65,7 +261,7 @@ extern "C" int lqtk_QCoreApplication_instance(lua_State* L)
         int nargs = lua_gettop(L);
         if (nargs == 0) { do {
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QCoreApplication::instance();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -180,16 +376,6 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 
 /* ============================================================================================ */
 
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QCoreApplication* ptr = (QCoreApplication*) objectPtr;
-        delete ptr;
-    }
-}
-
-/* ============================================================================================ */
-
 ObjectUdata* QCoreApplicationBinding::pushObject(lua_State* L, QCoreApplication* objPtr, OwnerType ownerType)
 {
         QGuiApplication* ptr1 = dynamic_cast<QGuiApplication*>(objPtr);
@@ -221,17 +407,22 @@ ObjectUdata* QCoreApplicationBinding::pushObject(lua_State* L, QCoreApplication*
 
 static const Member members[] =
 {
-    { "children",         Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
-    { "connect",          Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
-    { "event",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QObject_event },
-    { "instance",         Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_instance },
-    { "objectName",       Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
-    { "parent",           Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
-    { "processEvents",    Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_processEvents },
-    { "sendPostedEvents", Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_sendPostedEvents },
-    { "setObjectName",    Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
-    { "setParent",        Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
-    { NULL,               Member::NONE,                 NULL } /* sentinel */
+    { "applicationDirPath",  Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationDirPath },
+    { "applicationFilePath", Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationFilePath },
+    { "applicationName",     Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationName },
+    { "applicationPid",      Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationPid },
+    { "applicationVersion",  Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationVersion },
+    { "children",            Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
+    { "connect",             Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
+    { "event",               Member::VIRTUAL_FUNCTION,     (void*) lqtk_QObject_event },
+    { "instance",            Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_instance },
+    { "objectName",          Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
+    { "parent",              Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
+    { "processEvents",       Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_processEvents },
+    { "sendPostedEvents",    Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_sendPostedEvents },
+    { "setObjectName",       Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
+    { "setParent",           Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
+    { NULL,                  Member::NONE,                 NULL } /* sentinel */
 };
 
 /* ============================================================================================ */
@@ -247,11 +438,11 @@ const ClassInfo QCoreApplicationBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction
-    10,
+    15,
     members
 };
 

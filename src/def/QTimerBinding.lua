@@ -64,7 +64,7 @@ elements = {
     {
         method    = "timerEvent",
         binding   = {
-            { "void", { "QTimerEvent~" }, "protected" },
+            { "void", { "QTimerEvent~" }, "virtual", "protected" },
         }
     },
     {

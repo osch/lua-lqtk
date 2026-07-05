@@ -654,3 +654,11 @@ ClassUdata* ObjectUdata::pushBaseClass(lua_State* L, int udataIdx)
     return baseUdata;
 }
 
+void ObjectUdata::handleInvalidation(lua_State* L, int udataIdx)
+{
+    int top = lua_gettop(L);
+    if (udataIdx < 0) {
+        udataIdx = top + 1 + udataIdx;
+    }
+    invalidate(L, udataIdx);
+}

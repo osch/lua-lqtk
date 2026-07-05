@@ -158,6 +158,47 @@ extern "C" int lqtk_QFont_setPointSize(lua_State* L)
 
 /* ============================================================================================ */
 
+
+struct lqtk_QFont_setStyleHint_Args
+{
+    FromLua<QFont*> arg_1_1;
+    FromLua<QFont::StyleHint> arg_2_1;
+    FromLua<QFont::StyleStrategy> arg_3_1;
+};
+
+extern "C" int lqtk_QFont_setStyleHint(lua_State* L)
+{
+    lqtk_QFont_setStyleHint_Args  argValues;
+    lqtk_QFont_setStyleHint_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QFont::setStyleHint(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        if (nargs == 3) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            {
+                    args->arg_1_1.getValue()->QFont::setStyleHint(args->arg_2_1.getValue(), args->arg_3_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QFont", "setStyleHint", nargs, "2,3");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
 static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 {
     if (objectPtr)
@@ -181,7 +222,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QFont_new_Args
 {
@@ -280,11 +320,72 @@ ObjectUdata* QFontBinding::pushObject(lua_State* L, QFont* objPtr, OwnerType own
 
 static const Member members[] =
 {
-    { "bold",         Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_bold },
-    { "pointSize",    Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_pointSize },
-    { "setBold",      Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_setBold },
-    { "setPointSize", Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_setPointSize },
-    { NULL,           Member::NONE,                 NULL } /* sentinel */
+    { "AbsoluteSpacing",       Member::INTEGER,              (void*) QFont::AbsoluteSpacing },
+    { "AllLowercase",          Member::INTEGER,              (void*) QFont::AllLowercase },
+    { "AllUppercase",          Member::INTEGER,              (void*) QFont::AllUppercase },
+    { "AnyStretch",            Member::INTEGER,              (void*) QFont::AnyStretch },
+    { "AnyStyle",              Member::INTEGER,              (void*) QFont::AnyStyle },
+    { "Black",                 Member::INTEGER,              (void*) QFont::Black },
+    { "Bold",                  Member::INTEGER,              (void*) QFont::Bold },
+    { "Capitalize",            Member::INTEGER,              (void*) QFont::Capitalize },
+    { "Condensed",             Member::INTEGER,              (void*) QFont::Condensed },
+    { "ContextFontMerging",    Member::INTEGER,              (void*) QFont::ContextFontMerging },
+    { "Courier",               Member::INTEGER,              (void*) QFont::Courier },
+    { "Cursive",               Member::INTEGER,              (void*) QFont::Cursive },
+    { "Decorative",            Member::INTEGER,              (void*) QFont::Decorative },
+    { "DemiBold",              Member::INTEGER,              (void*) QFont::DemiBold },
+    { "Expanded",              Member::INTEGER,              (void*) QFont::Expanded },
+    { "ExtraBold",             Member::INTEGER,              (void*) QFont::ExtraBold },
+    { "ExtraCondensed",        Member::INTEGER,              (void*) QFont::ExtraCondensed },
+    { "ExtraExpanded",         Member::INTEGER,              (void*) QFont::ExtraExpanded },
+    { "ExtraLight",            Member::INTEGER,              (void*) QFont::ExtraLight },
+    { "Fantasy",               Member::INTEGER,              (void*) QFont::Fantasy },
+    { "ForceOutline",          Member::INTEGER,              (void*) QFont::ForceOutline },
+    { "Helvetica",             Member::INTEGER,              (void*) QFont::Helvetica },
+    { "Light",                 Member::INTEGER,              (void*) QFont::Light },
+    { "Medium",                Member::INTEGER,              (void*) QFont::Medium },
+    { "MixedCase",             Member::INTEGER,              (void*) QFont::MixedCase },
+    { "Monospace",             Member::INTEGER,              (void*) QFont::Monospace },
+    { "NoAntialias",           Member::INTEGER,              (void*) QFont::NoAntialias },
+    { "NoFontMerging",         Member::INTEGER,              (void*) QFont::NoFontMerging },
+    { "NoSubpixelAntialias",   Member::INTEGER,              (void*) QFont::NoSubpixelAntialias },
+    { "Normal",                Member::INTEGER,              (void*) QFont::Normal },
+    { "OldEnglish",            Member::INTEGER,              (void*) QFont::OldEnglish },
+    { "PercentageSpacing",     Member::INTEGER,              (void*) QFont::PercentageSpacing },
+    { "PreferAntialias",       Member::INTEGER,              (void*) QFont::PreferAntialias },
+    { "PreferBitmap",          Member::INTEGER,              (void*) QFont::PreferBitmap },
+    { "PreferDefault",         Member::INTEGER,              (void*) QFont::PreferDefault },
+    { "PreferDefaultHinting",  Member::INTEGER,              (void*) QFont::PreferDefaultHinting },
+    { "PreferDevice",          Member::INTEGER,              (void*) QFont::PreferDevice },
+    { "PreferFullHinting",     Member::INTEGER,              (void*) QFont::PreferFullHinting },
+    { "PreferMatch",           Member::INTEGER,              (void*) QFont::PreferMatch },
+    { "PreferNoHinting",       Member::INTEGER,              (void*) QFont::PreferNoHinting },
+    { "PreferNoShaping",       Member::INTEGER,              (void*) QFont::PreferNoShaping },
+    { "PreferOutline",         Member::INTEGER,              (void*) QFont::PreferOutline },
+    { "PreferQuality",         Member::INTEGER,              (void*) QFont::PreferQuality },
+    { "PreferTypoLineMetrics", Member::INTEGER,              (void*) QFont::PreferTypoLineMetrics },
+    { "PreferVerticalHinting", Member::INTEGER,              (void*) QFont::PreferVerticalHinting },
+    { "SansSerif",             Member::INTEGER,              (void*) QFont::SansSerif },
+    { "SemiCondensed",         Member::INTEGER,              (void*) QFont::SemiCondensed },
+    { "SemiExpanded",          Member::INTEGER,              (void*) QFont::SemiExpanded },
+    { "Serif",                 Member::INTEGER,              (void*) QFont::Serif },
+    { "SmallCaps",             Member::INTEGER,              (void*) QFont::SmallCaps },
+    { "StyleItalic",           Member::INTEGER,              (void*) QFont::StyleItalic },
+    { "StyleNormal",           Member::INTEGER,              (void*) QFont::StyleNormal },
+    { "StyleOblique",          Member::INTEGER,              (void*) QFont::StyleOblique },
+    { "System",                Member::INTEGER,              (void*) QFont::System },
+    { "Thin",                  Member::INTEGER,              (void*) QFont::Thin },
+    { "Times",                 Member::INTEGER,              (void*) QFont::Times },
+    { "TypeWriter",            Member::INTEGER,              (void*) QFont::TypeWriter },
+    { "UltraCondensed",        Member::INTEGER,              (void*) QFont::UltraCondensed },
+    { "UltraExpanded",         Member::INTEGER,              (void*) QFont::UltraExpanded },
+    { "Unstretched",           Member::INTEGER,              (void*) QFont::Unstretched },
+    { "bold",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_bold },
+    { "pointSize",             Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_pointSize },
+    { "setBold",               Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_setBold },
+    { "setPointSize",          Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_setPointSize },
+    { "setStyleHint",          Member::NORMAL_FUNCTION,      (void*) lqtk_QFont_setStyleHint },
+    { NULL,                    Member::NONE,                 NULL } /* sentinel */
 };
 
 /* ============================================================================================ */
@@ -304,7 +405,7 @@ const ClassInfo QFontBinding::classInfo =
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction
-    4,
+    65,
     members
 };
 

@@ -20,10 +20,6 @@ private:
     static int lqtk_destruct(lua_State* L);
 public:
     ~QEventLoopWrapper();
-
-
-
-/* -------------------------------------------------------------------------------------------- */
 public:
     bool event(
                    QEvent* arg2) override; 
@@ -33,13 +29,16 @@ public:
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
     }
 public:
     StateGuard* lqtk_stateGuard;
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

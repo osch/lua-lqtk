@@ -37,7 +37,7 @@ Listener::~Listener()
 lua_State* Listener::getL()
 {
     if (guard) {
-        return guard->L;
+        return guard->getL();
     }
     return NULL;
 }

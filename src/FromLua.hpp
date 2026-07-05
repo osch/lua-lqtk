@@ -344,6 +344,37 @@ private:
     
 /* ============================================================================================ */
 
+template<> class FromLua<const char*> : public FromLuaBase
+{
+public:
+    typedef const char* ValueType;
+    
+    FromLua()
+        : value()
+    {}
+    
+    operator ValueType() const {
+        return value;
+    }
+
+    ValueType getValue() const {
+        return value;
+    }
+
+    static const char* name() {
+        return "string";
+    }
+
+    bool test(lua_State* L, int arg);
+
+    void check(lua_State* L, int arg);
+
+private:
+    ValueType value;
+};
+    
+/* ============================================================================================ */
+
 template<> class FromLua<QByteArray*> : public FromLuaBase
 {
 public:

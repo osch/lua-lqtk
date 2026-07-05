@@ -5,6 +5,36 @@ baseClass = "QObject"
 elements = {
     --------------------------------------------------------------------------------------------------------------------------------------------------
     {
+        func      = "applicationDirPath",
+        binding   = {
+            { "QString", {} },
+        }
+    },
+    {
+        func      = "applicationFilePath",
+        binding   = {
+            { "QString", {} },
+        }
+    },
+    {
+        func      = "applicationName",
+        binding   = {
+            { "QString", {} },
+        }
+    },
+    {
+        func      = "applicationPid",
+        binding   = {
+            { "qint64", {} },
+        }
+    },
+    {
+        func      = "applicationVersion",
+        binding   = {
+            { "QString", {} },
+        }
+    },
+    {
         func      = "instance",
         binding   = {
             { "QCoreApplication*", {} },

@@ -387,7 +387,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QPolygonF_new_Args
 {
     explicit lqtk_QPolygonF_new_Args(bool explicitNew)

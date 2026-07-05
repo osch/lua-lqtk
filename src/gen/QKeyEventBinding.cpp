@@ -417,7 +417,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QKeyEvent_new_Args
 {
     explicit lqtk_QKeyEvent_new_Args(bool explicitNew)

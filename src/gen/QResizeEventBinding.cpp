@@ -137,7 +137,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QResizeEvent_new_Args
 {
     FromLua<QSize*> arg_1_1;

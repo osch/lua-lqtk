@@ -7,6 +7,7 @@ namespace lqtk
 {
 
 class QStandardItemModelWrapper : public QStandardItemModel
+                      , public QAbstractItemModelExportWrapper
 {
 public:
 
@@ -29,38 +30,31 @@ private:
     static int lqtk_destruct(lua_State* L);
 public:
     ~QStandardItemModelWrapper();
-
-
-
-/* -------------------------------------------------------------------------------------------- */
+    QModelIndex lqtk_QAbstractItemModel_createIndex(
+                   int arg1, 
+                   int arg2) override; 
+    QModelIndex lqtk_QAbstractItemModel_createIndex(
+                   int arg1, 
+                   int arg2, 
+                   int arg3) override; 
 public:
-    struct data1CallArgs : BindingUtil::CallArgs {
-        data1CallArgs(
-                QStandardItemModel* thiz,
-                    QModelIndex arg2, 
-                    int arg3) 
-              : BindingUtil::CallArgs(thiz),
-                hasValidResult(false),
-                arg1(thiz),
-                arg2(arg2), 
-                arg3(arg3) 
-        {}
-
-        bool hasValidResult;
-        FromLua<QVariant*> rsltPtr;
-        QVariant rslt;
-        ToLua<QStandardItemModel*> arg1;
-        ToLua<QModelIndex*> arg2;
-        ToLua<int> arg3;
-    };
-    
-    static int data1_doLua(lua_State* L);
+    int columnCount(
+                   const QModelIndex& arg2) const override; 
 public:
     QVariant data(
                    const QModelIndex& arg2, 
                    int arg3) const override; 
-
-/* -------------------------------------------------------------------------------------------- */
+public:
+    QModelIndex index(
+                   int arg2, 
+                   int arg3, 
+                   const QModelIndex& arg4) const override; 
+public:
+    QModelIndex parent(
+                   const QModelIndex& arg2) const override; 
+public:
+    int rowCount(
+                   const QModelIndex& arg2) const override; 
 public:
     bool event(
                    QEvent* arg2) override; 
@@ -70,13 +64,16 @@ public:
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
     }
 public:
     StateGuard* lqtk_stateGuard;
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

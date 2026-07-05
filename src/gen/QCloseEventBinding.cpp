@@ -71,7 +71,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QCloseEvent_new_Args
 {
     ToLua<QCloseEvent*> rslt_1;

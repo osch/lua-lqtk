@@ -1871,7 +1871,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QRectF_new_Args
 {
     FromLua<QRect*> arg_1_1;

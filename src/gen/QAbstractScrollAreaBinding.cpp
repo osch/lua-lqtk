@@ -12,7 +12,9 @@
 #include <QObject>
 #include <QPaintEvent>
 #include <QResizeEvent>
+#include <QVariant>
 #include <QWidget>
+#include <Qt>
 
 #include <QPointer>
 #include <stdexcept>
@@ -39,11 +41,14 @@
 #include "QObjectBinding.hpp"
 #include "QPaintEventBinding.hpp"
 #include "QResizeEventBinding.hpp"
+#include "QVariantBinding.hpp"
 #include "QWidgetBinding.hpp"
+#include "QtBinding.hpp"
 #include "QObjectWrapper.hpp"
 #include "QWidgetWrapper.hpp"
 #include "QFrameWrapper.hpp"
 #include "QAbstractScrollAreaWrapper.hpp"
+#include "QWidgetBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -80,13 +85,20 @@ namespace lqtk
     QAbstractScrollAreaWrapper::~QAbstractScrollAreaWrapper() {
         trace::printf("Deleting lqtk::QAbstractScrollAreaWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QAbstractScrollArea* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QAbstractScrollArea");
             }
             StateGuard::releaseRef(&lqtk_stateGuard, StateGuard::FOR_QT_OBJECT);
         }
+    }
+
+    void QAbstractScrollAreaWrapper::lqtk_QAbstractScrollArea_resizeEvent(
+                   QResizeEvent* arg1) 
+    {
+        return QAbstractScrollArea::resizeEvent(
+                   arg1); 
     }
 
     void QAbstractScrollAreaWrapper::lqtk_QWidget_closeEvent(
@@ -146,6 +158,27 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
+    void QAbstractScrollAreaWrapper::resizeEvent(
+                   QResizeEvent* arg2) 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QWidgetWrapper::resizeEvent1CallArgs args(
+                    this,
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::resizeEvent1_doLua, &args, "QAbstractScrollArea", "resizeEvent");
+            }
+            if (args.wasCalled) {
+                return;
+            }
+        }
+        return QAbstractScrollArea::resizeEvent(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
     void QAbstractScrollAreaWrapper::closeEvent(
                    QCloseEvent* arg2) 
     {
@@ -172,12 +205,12 @@ namespace lqtk
     {
         lua_State* L = getL();
         if (L) {
-            QWidgetWrapper::event1CallArgs args(
+            QObjectWrapper::event1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::event1_doLua, &args, "QAbstractScrollArea", "event");
+                BindingUtil::callLuaMethodImpl(L, QObjectWrapper::event1_doLua, &args, "QAbstractScrollArea", "event");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -240,6 +273,33 @@ namespace lqtk
             }
         }
         return QAbstractScrollArea::heightForWidth(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    QVariant QAbstractScrollAreaWrapper::inputMethodQuery(
+                   Qt::InputMethodQuery arg2) const 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QWidgetWrapper::inputMethodQuery1CallArgs args(
+                    const_cast<QAbstractScrollAreaWrapper*>(this),
+
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::inputMethodQuery1_doLua, &args, "QAbstractScrollArea", "inputMethodQuery");
+            }
+            if (args.wasCalled) {
+                if (args.hasValidResult) {
+                    return args.rslt;
+                } else {
+                    const char* msg = "an object of type 'QVariant'";
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "QAbstractScrollArea", "inputMethodQuery", msg);
+                }
+            }
+        }
+        return QAbstractScrollArea::inputMethodQuery(
                     arg2); 
     }
 
@@ -349,23 +409,23 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    void QAbstractScrollAreaWrapper::resizeEvent(
-                   QResizeEvent* arg2) 
+    void QAbstractScrollAreaWrapper::setVisible(
+                   bool arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            QWidgetWrapper::resizeEvent1CallArgs args(
+            QWidgetWrapper::setVisible1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::resizeEvent1_doLua, &args, "QAbstractScrollArea", "resizeEvent");
+                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::setVisible1_doLua, &args, "QAbstractScrollArea", "setVisible");
             }
             if (args.wasCalled) {
                 return;
             }
         }
-        return QAbstractScrollArea::resizeEvent(
+        return QAbstractScrollArea::setVisible(
                     arg2); 
     }
 
@@ -391,6 +451,7 @@ extern "C" {
     int lqtk_QWidget_height(lua_State* L);
     int lqtk_QWidget_heightForWidth(lua_State* L);
     int lqtk_QWidget_hide(lua_State* L);
+    int lqtk_QWidget_inputMethodQuery(lua_State* L);
     int lqtk_QWidget_mouseDoubleClickEvent(lua_State* L);
     int lqtk_QWidget_mouseMoveEvent(lua_State* L);
     int lqtk_QWidget_mousePressEvent(lua_State* L);
@@ -400,12 +461,20 @@ extern "C" {
     int lqtk_QWidget_palette(lua_State* L);
     int lqtk_QWidget_parentWidget(lua_State* L);
     int lqtk_QWidget_resize(lua_State* L);
-    int lqtk_QWidget_resizeEvent(lua_State* L);
     int lqtk_QWidget_setBackgroundRole(lua_State* L);
     int lqtk_QWidget_setFont(lua_State* L);
     int lqtk_QWidget_setGeometry(lua_State* L);
     int lqtk_QWidget_setLayout(lua_State* L);
     int lqtk_QWidget_setSizePolicy(lua_State* L);
+    int lqtk_QWidget_setStyleSheet(lua_State* L);
+    int lqtk_QWidget_setToolTip(lua_State* L);
+    int lqtk_QWidget_setToolTipDuration(lua_State* L);
+    int lqtk_QWidget_setUpdatesEnabled(lua_State* L);
+    int lqtk_QWidget_setVisible(lua_State* L);
+    int lqtk_QWidget_setWhatsThis(lua_State* L);
+    int lqtk_QWidget_setWindowFilePath(lua_State* L);
+    int lqtk_QWidget_setWindowFlag(lua_State* L);
+    int lqtk_QWidget_setWindowFlags(lua_State* L);
     int lqtk_QWidget_setWindowTitle(lua_State* L);
     int lqtk_QWidget_show(lua_State* L);
     int lqtk_QWidget_size(lua_State* L);
@@ -413,12 +482,115 @@ extern "C" {
     int lqtk_QWidget_sizePolicy(lua_State* L);
     int lqtk_QWidget_update(lua_State* L);
     int lqtk_QWidget_width(lua_State* L);
+    int lqtk_QWidget_windowFlags(lua_State* L);
+    int lqtk_QWidget_windowModality(lua_State* L);
+    int lqtk_QWidget_windowOpacity(lua_State* L);
+    int lqtk_QWidget_windowRole(lua_State* L);
+    int lqtk_QWidget_windowState(lua_State* L);
     int lqtk_QObject_children(lua_State* L);
     int lqtk_QObject_connect(lua_State* L);
     int lqtk_QObject_objectName(lua_State* L);
     int lqtk_QObject_parent(lua_State* L);
     int lqtk_QObject_setObjectName(lua_State* L);
     int lqtk_QObject_setParent(lua_State* L);
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QAbstractScrollArea_resizeEvent_Args
+{
+    FromLua<QAbstractScrollArea*> arg_1_1;
+    FromLua<QResizeEvent*> arg_2_1;
+};
+
+extern "C" int lqtk_QAbstractScrollArea_resizeEvent(lua_State* L)
+{
+    lqtk_QAbstractScrollArea_resizeEvent_Args  argValues;
+    lqtk_QAbstractScrollArea_resizeEvent_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                QAbstractScrollAreaExportWrapper* wrapper = dynamic_cast<QAbstractScrollAreaExportWrapper*>(args->arg_1_1.getValue());
+                if (!wrapper) {
+                    return util::argError(L, 1, "method 'resizeEvent' is protected in QAbstractScrollArea");
+                }
+                    wrapper->lqtk_QAbstractScrollArea_resizeEvent(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QAbstractScrollArea", "resizeEvent", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QAbstractScrollArea_setSizeAdjustPolicy_Args
+{
+    FromLua<QAbstractScrollArea*> arg_1_1;
+    FromLua<QAbstractScrollArea::SizeAdjustPolicy> arg_2_1;
+};
+
+extern "C" int lqtk_QAbstractScrollArea_setSizeAdjustPolicy(lua_State* L)
+{
+    lqtk_QAbstractScrollArea_setSizeAdjustPolicy_Args  argValues;
+    lqtk_QAbstractScrollArea_setSizeAdjustPolicy_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QAbstractScrollArea::setSizeAdjustPolicy(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QAbstractScrollArea", "setSizeAdjustPolicy", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QAbstractScrollArea_sizeAdjustPolicy_Args
+{
+    FromLua<QAbstractScrollArea*> arg_1_1;
+    ToLua<QAbstractScrollArea::SizeAdjustPolicy> rslt_1;
+};
+
+extern "C" int lqtk_QAbstractScrollArea_sizeAdjustPolicy(lua_State* L)
+{
+    lqtk_QAbstractScrollArea_sizeAdjustPolicy_Args  argValues;
+    lqtk_QAbstractScrollArea_sizeAdjustPolicy_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QAbstractScrollArea::sizeAdjustPolicy();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QAbstractScrollArea", "sizeAdjustPolicy", nargs, "1");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
 }
 
 /* ============================================================================================ */
@@ -472,7 +644,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QAbstractScrollArea_new_Args
 {
     FromLua<QWidget*> arg_1_1;
@@ -501,7 +672,7 @@ extern "C" int lqtk_QAbstractScrollArea_constructor(lua_State* L, bool explicitN
             lua_remove(L, 1);
         }
 
-        QWidgetBinding::intercept_new();
+        QWidgetBinding2::assert_new();
 
         if (nargs == 0) { do {
             {
@@ -582,52 +753,72 @@ ObjectUdata* QAbstractScrollAreaBinding::pushObject(lua_State* L, QAbstractScrol
 
 static const Member members[] =
 {
-    { "acceptDrops",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_acceptDrops },
-    { "accessibleDescription", Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleDescription },
-    { "accessibleIdentifier",  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleIdentifier },
-    { "accessibleName",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleName },
-    { "addActions",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_addActions },
-    { "children",              Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
-    { "close",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_close },
-    { "closeEvent",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_closeEvent },
-    { "connect",               Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
-    { "event",                 Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_event },
-    { "font",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_font },
-    { "geometry",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_geometry },
-    { "hasHeightForWidth",     Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_hasHeightForWidth },
-    { "height",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_height },
-    { "heightForWidth",        Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_heightForWidth },
-    { "hide",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_hide },
-    { "keyboardGrabber",       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_keyboardGrabber },
-    { "mouseDoubleClickEvent", Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseDoubleClickEvent },
-    { "mouseGrabber",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_mouseGrabber },
-    { "mouseMoveEvent",        Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseMoveEvent },
-    { "mousePressEvent",       Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mousePressEvent },
-    { "mouseReleaseEvent",     Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseReleaseEvent },
-    { "move",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_move },
-    { "objectName",            Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
-    { "paintEvent",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_paintEvent },
-    { "palette",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_palette },
-    { "parent",                Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
-    { "parentWidget",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_parentWidget },
-    { "resize",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_resize },
-    { "resizeEvent",           Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_resizeEvent },
-    { "setBackgroundRole",     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setBackgroundRole },
-    { "setFont",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setFont },
-    { "setGeometry",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setGeometry },
-    { "setLayout",             Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setLayout },
-    { "setObjectName",         Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
-    { "setParent",             Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
-    { "setSizePolicy",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setSizePolicy },
-    { "setTabOrder",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setTabOrder },
-    { "setWindowTitle",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowTitle },
-    { "show",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_show },
-    { "size",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_size },
-    { "sizeHint",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizeHint },
-    { "sizePolicy",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizePolicy },
-    { "update",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_update },
-    { "width",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_width },
-    { NULL,                    Member::NONE,                 NULL } /* sentinel */
+    { "AdjustIgnored",               Member::INTEGER,              (void*) QAbstractScrollArea::AdjustIgnored },
+    { "AdjustToContents",            Member::INTEGER,              (void*) QAbstractScrollArea::AdjustToContents },
+    { "AdjustToContentsOnFirstShow", Member::INTEGER,              (void*) QAbstractScrollArea::AdjustToContentsOnFirstShow },
+    { "acceptDrops",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_acceptDrops },
+    { "accessibleDescription",       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleDescription },
+    { "accessibleIdentifier",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleIdentifier },
+    { "accessibleName",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleName },
+    { "addActions",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_addActions },
+    { "children",                    Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
+    { "close",                       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_close },
+    { "closeEvent",                  Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_closeEvent },
+    { "connect",                     Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
+    { "event",                       Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_event },
+    { "font",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_font },
+    { "geometry",                    Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_geometry },
+    { "hasHeightForWidth",           Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_hasHeightForWidth },
+    { "height",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_height },
+    { "heightForWidth",              Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_heightForWidth },
+    { "hide",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_hide },
+    { "inputMethodQuery",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_inputMethodQuery },
+    { "keyboardGrabber",             Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_keyboardGrabber },
+    { "mouseDoubleClickEvent",       Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseDoubleClickEvent },
+    { "mouseGrabber",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_mouseGrabber },
+    { "mouseMoveEvent",              Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseMoveEvent },
+    { "mousePressEvent",             Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mousePressEvent },
+    { "mouseReleaseEvent",           Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseReleaseEvent },
+    { "move",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_move },
+    { "objectName",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
+    { "paintEvent",                  Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_paintEvent },
+    { "palette",                     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_palette },
+    { "parent",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
+    { "parentWidget",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_parentWidget },
+    { "resize",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_resize },
+    { "resizeEvent",                 Member::VIRTUAL_FUNCTION,     (void*) lqtk_QAbstractScrollArea_resizeEvent },
+    { "setBackgroundRole",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setBackgroundRole },
+    { "setFont",                     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setFont },
+    { "setGeometry",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setGeometry },
+    { "setLayout",                   Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setLayout },
+    { "setObjectName",               Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
+    { "setParent",                   Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
+    { "setSizeAdjustPolicy",         Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractScrollArea_setSizeAdjustPolicy },
+    { "setSizePolicy",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setSizePolicy },
+    { "setStyleSheet",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setStyleSheet },
+    { "setTabOrder",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setTabOrder },
+    { "setToolTip",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setToolTip },
+    { "setToolTipDuration",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setToolTipDuration },
+    { "setUpdatesEnabled",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setUpdatesEnabled },
+    { "setVisible",                  Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_setVisible },
+    { "setWhatsThis",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWhatsThis },
+    { "setWindowFilePath",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFilePath },
+    { "setWindowFlag",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFlag },
+    { "setWindowFlags",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFlags },
+    { "setWindowTitle",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowTitle },
+    { "show",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_show },
+    { "size",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_size },
+    { "sizeAdjustPolicy",            Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractScrollArea_sizeAdjustPolicy },
+    { "sizeHint",                    Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizeHint },
+    { "sizePolicy",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizePolicy },
+    { "update",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_update },
+    { "width",                       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_width },
+    { "windowFlags",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowFlags },
+    { "windowModality",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowModality },
+    { "windowOpacity",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowOpacity },
+    { "windowRole",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowRole },
+    { "windowState",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowState },
+    { NULL,                          Member::NONE,                 NULL } /* sentinel */
 };
 
 /* ============================================================================================ */
@@ -647,7 +838,7 @@ const ClassInfo QAbstractScrollAreaBinding::classInfo =
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     setUserValueFunction,
-    45,
+    65,
     members
 };
 

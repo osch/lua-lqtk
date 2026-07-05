@@ -63,12 +63,14 @@ local validDefinitionPars = Set("class", "namespace", "baseClass",
                              "elements", "polymorphic")
 
 local validElementPars = Set("enum", "flag", "func", "method",
-                             "intercept",
+                             "assert", "intercept",
                              "values", "binding", "delegate", "proxy")
+
+local nameElementsPars = Set("enum", "flag", "func", "method")
 
 local validValuesPars = Set("cmt")
 
-local validBindPars = Set("isMethod", "virtual", "=0", "override", "protected", "const")
+local validBindPars = Set("isMethod", "virtual", "=0", "override", "protected", "const", "private")
 
 local BindingMeta = {}
 do
@@ -86,20 +88,27 @@ end
 
 local hasConstructorSet = {}
 local hasVirtualMemberSet = {}
-local hasProtectedMemberSet = {}
+local hasOwnVirtualMemberSet = {}
+local hasOwnProtectedMemberSet = {}
 local needsGuardSet = {}
 local needsValidityCheckSet = {}
 local hasConstructorProxySet = {}
 
 function hasProtectedMethods(bindingName)
-    return hasProtectedMemberSet[bindingName]
+    return hasOwnProtectedMemberSet[bindingName]
+end
+
+function hasConstructor(bindingName)
+    return hasConstructorSet[bindingName]
 end
 
 function needsWrapper(bindingName)
-    return hasConstructorSet[bindingName] and (   hasVirtualMemberSet[bindingName] 
-                                               or needsGuardSet[bindingName]
-                                               or needsValidityCheckSet[bindingName]
-                                               or hasConstructorProxySet[bindingName])
+    return   hasConstructorSet[bindingName] and (   hasVirtualMemberSet[bindingName] 
+                                                 or needsGuardSet[bindingName]
+                                                 or needsValidityCheckSet[bindingName]
+                                                 or hasConstructorProxySet[bindingName])
+      or not hasConstructorSet[bindingName] and (   hasOwnVirtualMemberSet[bindingName] 
+                                                 or hasOwnProtectedMemberSet[bindingName])
 end
 
 function getBinding(name, ignoreErrors)
@@ -130,7 +139,22 @@ function getBinding(name, ignoreErrors)
             end
             if binding.elements then
                 for _, e in ipairs(binding.elements) do
+                    for k, v in pairs(e) do
+                        assert(validElementPars[k], k)
+                    end
                     assert(not(e.method and e.func))
+                    for i, p in ipairs(nameElementsPars) do
+                        if e[p] then
+                            for j, p2 in ipairs(nameElementsPars) do
+                                assert(j == i or not e[p2])
+                            end
+                            e.name = e[p]
+                            break
+                        end
+                    end
+                    assert(e.name)
+                    assert(not binding.elements[e.name])
+                    binding.elements[e.name] = e
                     if e.func == "new" then
                         hasConstructorSet[name] = true
                         if e.proxy then
@@ -151,12 +175,14 @@ function getBinding(name, ignoreErrors)
                         for i = 3, #b do
                             local v = b[i]
                             b[v] = true
-                            if isOneOf(v, "virtual", "=0", "override", "protected") then
+                            if isOneOf(v, "virtual", "=0", "override") then
                                 b.virtual = true
+                                e.virtual = true
                                 hasVirtualMemberSet[name] = true
+                                hasOwnVirtualMemberSet[name] = true
                             end
                             if v == "protected" then
-                                hasProtectedMemberSet[name] = true
+                                hasOwnProtectedMemberSet[name] = true
                             end
                         end
                     end
@@ -164,6 +190,22 @@ function getBinding(name, ignoreErrors)
             end
         end
         return binding
+    end
+end
+
+function getVirtualMethodTopBaseClass(bindingName, memberName)
+    if bindingName then
+        local binding = getBinding(bindingName)
+        if binding.baseClass then
+            local rslt = getVirtualMethodTopBaseClass(binding.baseClass, memberName)
+            if rslt then
+                return rslt
+            end
+        end
+        local e = binding.elements and binding.elements[memberName]
+        if e and e.method and e.virtual then
+            return bindingName
+        end
     end
 end
 
@@ -189,7 +231,22 @@ function getConstructorProxy(binding)
     end
 end
 
-function hasInterceptor(binding, funcName)
+function hasAssertion(binding, funcName)
+    local binding = type(binding) == "string" and getBinding(binding) or binding
+    for _, e in ipairs(binding.elements or {}) do
+        if funcName then
+            if e.func == funcName or e.method == funcName then
+                return e.assert
+            end
+        else
+            if e.assert then
+                return true
+            end
+        end
+    end
+end
+
+function hasInterception(binding, funcName)
     local binding = type(binding) == "string" and getBinding(binding) or binding
     for _, e in ipairs(binding.elements or {}) do
         if funcName then
@@ -204,49 +261,12 @@ function hasInterceptor(binding, funcName)
     end
 end
 
-function getDelegateOrInterceptedFuncs(bindingName)
-    local rslt = {}
-    local binding = getBinding(bindingName)
-    for _, e in ipairs(binding.elements or {}) do
-        if (e.func or e.method) and (e.delegate or e.intercept) then
-            assert(   (e.name == "new" and     e.binding and not e.delegate)
-                   or (e.name ~= "new" and     e.binding and not e.delegate)
-                   or (e.name ~= "new" and not e.binding and     e.delegate))
-            local binding = {}
-            if e.intercept then
-                binding[1] = { "void", {}}
-            else
-                for _, bnd in ipairs(e.binding or e.delegate) do
-                    local newArgs = {}
-                    local newBnd = { bnd[1], newArgs }
-                    local args = bnd[2]
-                    if e.method then
-                        newArgs[1] = bindingName.."*"
-                    end
-                    for _, a in ipairs(args) do
-                        newArgs[#newArgs + 1] = a
-                    end
-                    binding[#binding + 1] = newBnd
-                end
-            end
-            rslt[#rslt + 1] = {
-                name = e.func or e.method,
-                isMethod = e.method ~= nil,
-                isFunc   = e.func ~= nil,
-                binding = binding,
-                isDelegate = e.delegate,
-                isIntercepted = e.intercept
-            }
-        end
-    end
-    return rslt
-end
-
 function hasBinding(name)
     return getBinding(name, true) 
 end
 
 
+hasDelegate = false
 
 thisDef = getBinding(BINDING)
 do
@@ -268,8 +288,8 @@ do
     end
     if thisDef.elements then
         for _, e in ipairs(thisDef.elements) do
-            for k, v in pairs(e) do
-                assert(validElementPars[k], k)
+            if e.delegate then
+                hasDelegate = true
             end
             for _, val in ipairs(e.values or {}) do
                 if type(val) == "table" then
@@ -318,8 +338,12 @@ function isNullablePtrType(arg)
     return arg:match("%?$")
 end
 
+function needsStartGuarding(rsltType)
+    return rsltType:match("%!$")
+end
+
 function toCType(arg)
-    return arg:gsub("[~@*?]%??$", "*")
+    return arg:gsub("[~@*?]%??$", "*"):gsub("%!$", "")
 end
 
 function toCTypeForOverride(arg)
@@ -383,20 +407,22 @@ function calcBindingArgs(binding)
     local toLuaTypes = {}
     local argNameMap = {}
     for b, bind in ipairs(binding) do
-        argNameMap[b] = {}
-        local rsltType = bind[1]
-        local argTypes = bind[2]
-        if rsltType ~= "void" and rsltType ~= "this" then
-            local idx, cnt = considerType(toLuaTypes, rsltType)
-            assert(cnt == 1, require"inspect"{toLuaTypes, rsltType, idx, cnt})
-            argNameMap[b][0] = format("rslt_%s", idx)
+        if not bind.abstract then
+            argNameMap[b] = {}
+            local rsltType = bind[1]
+            local argTypes = bind[2]
+            if rsltType ~= "void" and rsltType ~= "this" then
+                local idx, cnt = considerType(toLuaTypes, rsltType)
+                assert(cnt == 1, require"inspect"{toLuaTypes, rsltType, idx, cnt})
+                argNameMap[b][0] = format("rslt_%s", idx)
+            end
+            for a, arg in ipairs(argTypes) do
+                local idx, cnt = considerType(fromLuaTypes, arg)
+                argNameMap[b][a] = format("arg_%s_%s", idx, cnt)
+            end
+            finishCounts(fromLuaTypes)
+            finishCounts(toLuaTypes)
         end
-        for a, arg in ipairs(argTypes) do
-            local idx, cnt = considerType(fromLuaTypes, arg)
-            argNameMap[b][a] = format("arg_%s_%s", idx, cnt)
-        end
-        finishCounts(fromLuaTypes)
-        finishCounts(toLuaTypes)
     end    
     return isCritical, fromLuaTypes, toLuaTypes, argNameMap
 end
@@ -440,13 +466,15 @@ do
         if flags[name] ~= nil then
             return flags[name]
         else
-            local n1, n2 = name:match("^([^:]*)::(.*)$")
-            if n1 and n2 then
-                local bnd = getBinding(n1)
-                for _, e in ipairs(bnd.elements) do
-                    if e.flag == n2 then
-                        flags[name] = true
-                        return true
+            if not name:match("^QList%<") then
+                local n1, n2 = name:match("^([^:]*)::(.*)$")
+                if n1 and n2 then
+                    local bnd = getBinding(n1)
+                    for _, e in ipairs(bnd.elements) do
+                        if e.flag == n2 then
+                            flags[name] = true
+                            return true
+                        end
                     end
                 end
             end
@@ -459,13 +487,15 @@ do
         if enums[name] ~= nil then
             return enums[name]
         else
-            local n1, n2 = name:match("^([^:]*)::(.*)$")
-            if n1 and n2 then
-                local bnd = getBinding(n1)
-                for _, e in ipairs(bnd.elements) do
-                    if e.enum == n2 then
-                        enums[name] = true
-                        return true
+            if not name:match("^QList%<") then
+                local n1, n2 = name:match("^([^:]*)::(.*)$")
+                if n1 and n2 then
+                    local bnd = getBinding(n1)
+                    for _, e in ipairs(bnd.elements) do
+                        if e.enum == n2 then
+                            enums[name] = true
+                            return true
+                        end
                     end
                 end
             end
@@ -492,6 +522,7 @@ do
     end
     
     function isClass(name)
+        name = name:gsub("%!$", "")
         if classes[name] ~= nil then
             return classes[name]
         else
@@ -505,6 +536,29 @@ do
         end
     end
 
+    local needsObjectObserverSet = {}
+    function needsObjectObserver(name)
+        local rslt = needsObjectObserverSet[name]
+        if rslt == nil then
+            local b = getBinding(name, true)
+            rslt = false
+            if b and b.elements then
+                for _, e in ipairs(b.elements) do
+                    if (e.method or e.func) and e.binding then
+                        for _, bnd in ipairs(e.binding) do
+                            if not bnd.private and needsStartGuarding(bnd[1]) then
+                                rslt = true
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+            needsObjectObserverSet[name] = rslt
+        end
+        return rslt
+    end
+    
     qincludes = {}
     local function addInclude(name)
         if name then
@@ -559,6 +613,7 @@ do
     
     hasVirtualMembers = false
     virtualMembers = {}
+    privateBindings = {}
 
     for i = 1, #allDefs do
         local def = allDefs[i]
@@ -597,7 +652,7 @@ do
                     assert(isFunc)
                     if i == 1 then
                         constructor = element
-                        constructor.isIntercepted = element.intercept
+                        constructor.isAsserted = element.assert
                         if constructor.binding then
                             local argCounts = {}
                             local checkBnd = {}
@@ -665,7 +720,7 @@ do
                                      fromClass = def.class, 
                                      fromBase = (i > 1),
                                      isDelegate    = isDelegate,
-                                     isIntercepted = element.intercept,
+                                     isAsserted = element.assert,
                                      expectedArgCount = argCounts and table.concat(argCounts, ",") }
                     members[#members + 1] = member
                     members[element.name] = member
@@ -673,6 +728,7 @@ do
                     functions[element.name] = member
                     if binding and #binding > 0 then
                         local allAbstract = true
+                        local allPrivate = true
                         local hasVirtual = false
                         local hasProtected = false
                         for _, bnd in ipairs(binding) do
@@ -683,13 +739,55 @@ do
                             if not bnd.abstract then
                                 allAbstract = false
                             end
-                            if bnd.protected or bnd.override or bnd.abstract or bnd.virtual then
-                                hasVirtual = true
+                            if bnd.private then
+                                assert(not bnd.abstract)
+                                local privateBnd = { name = element.name }
+                                for k, v in pairs(bnd) do
+                                    privateBnd[k] = v
+                                end
+                                append(privateBindings, privateBnd)
+                            else
+                                allPrivate = false
+                            end
+                            if bnd.override or bnd.abstract or bnd.virtual then
+                                if not bnd.private then
+                                    local privateFound = false
+                                    for _, pb in ipairs(privateBindings) do
+                                        if pb.name == element.name then
+                                            local allEqual = true
+                                            if pb[1] ~= bnd[1] then
+                                                allEqual = false
+                                            else
+                                                for i, a in ipairs(pb[2]) do
+                                                    if a ~= bnd[2][i] then
+                                                        allEqual = false
+                                                        break
+                                                    end
+                                                end
+                                            end
+                                            if allEqual then
+                                                privateFound = true
+                                                break
+                                            end
+                                        end
+                                    end
+                                    if not privateFound then
+                                        hasVirtual = true
+                                    end
+                                end
                                 bnd.virtual = true
                             end
                             if bnd.protected then
                                 hasProtected = true
                             end
+                        end
+                        if allPrivate then
+                            member.private = true
+                            considered[member.name] = false
+                            members[#members] = nil
+                            members[element.name] = nil
+                            functions[#functions] = nil
+                            functions[element.name] = nil
                         end
                         if allAbstract then
                             member.abstract = true
@@ -729,9 +827,6 @@ do
                 end
             end
         end
-    else
-        hasVirtualMembers = false
-        virtualMembers = {}
     end
     
     do
@@ -783,7 +878,8 @@ do
     
     if thisDef.class then
         needsValidityCheck = thisDef.needsValidityCheck
-        needsWrapperClass  = constructor and (hasVirtualMembers or thisDef.needsGuard or needsValidityCheck or constructorProxy)
+        needsWrapperClass  =        constructor and (hasVirtualMembers or thisDef.needsGuard or needsValidityCheck or constructorProxy)
+                             or not constructor and (hasOwnProtectedMemberSet[BINDING] or hasOwnVirtualMemberSet[BINDING])
         if needsWrapperClass then
             wrapperClass = thisDef.class.."Wrapper"
             if needsValidityCheck or constructorProxy or thisDef.onlyWrapped then

@@ -59,7 +59,7 @@ extern "C" int lqtk_QThread_currentThread(lua_State* L)
         int nargs = lua_gettop(L);
         if (nargs == 0) { do {
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QThread::currentThread();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -182,16 +182,6 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 
 /* ============================================================================================ */
 
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QThread* ptr = (QThread*) objectPtr;
-        delete ptr;
-    }
-}
-
-/* ============================================================================================ */
-
 ObjectUdata* QThreadBinding::pushObject(lua_State* L, QThread* objPtr, OwnerType ownerType)
 {
     StateGuard::pushWeakUdataRef(L, objPtr);                             // -> udata?
@@ -246,7 +236,7 @@ const ClassInfo QThreadBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction

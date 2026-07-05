@@ -14,7 +14,7 @@
 #include "util.hpp"
 
 #include "ClassInfo.hpp"
-#include "QWidgetBinding.hpp"
+#include "QWidgetBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -22,7 +22,7 @@ using namespace lqtk;
 
 /* ============================================================================================ */
 
-void QWidgetBinding::intercept_new()
+void QWidgetBinding2::assert_new()
 {
     if (!QCoreApplication::instance()) {
         throw std::runtime_error("Must construct a QApplication before a QWidget");

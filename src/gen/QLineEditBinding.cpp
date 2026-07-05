@@ -11,7 +11,9 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <QString>
+#include <QVariant>
 #include <QWidget>
+#include <Qt>
 
 #include <QPointer>
 #include <stdexcept>
@@ -37,10 +39,13 @@
 #include "QPaintEventBinding.hpp"
 #include "QResizeEventBinding.hpp"
 #include "QStringBinding.hpp"
+#include "QVariantBinding.hpp"
 #include "QWidgetBinding.hpp"
+#include "QtBinding.hpp"
 #include "QObjectWrapper.hpp"
 #include "QWidgetWrapper.hpp"
 #include "QLineEditWrapper.hpp"
+#include "QWidgetBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -91,7 +96,7 @@ namespace lqtk
     QLineEditWrapper::~QLineEditWrapper() {
         trace::printf("Deleting lqtk::QLineEditWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QLineEdit* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QLineEdit");
@@ -183,12 +188,12 @@ namespace lqtk
     {
         lua_State* L = getL();
         if (L) {
-            QWidgetWrapper::event1CallArgs args(
+            QObjectWrapper::event1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::event1_doLua, &args, "QLineEdit", "event");
+                BindingUtil::callLuaMethodImpl(L, QObjectWrapper::event1_doLua, &args, "QLineEdit", "event");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -251,6 +256,33 @@ namespace lqtk
             }
         }
         return QLineEdit::heightForWidth(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    QVariant QLineEditWrapper::inputMethodQuery(
+                   Qt::InputMethodQuery arg2) const 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QWidgetWrapper::inputMethodQuery1CallArgs args(
+                    const_cast<QLineEditWrapper*>(this),
+
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::inputMethodQuery1_doLua, &args, "QLineEdit", "inputMethodQuery");
+            }
+            if (args.wasCalled) {
+                if (args.hasValidResult) {
+                    return args.rslt;
+                } else {
+                    const char* msg = "an object of type 'QVariant'";
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "QLineEdit", "inputMethodQuery", msg);
+                }
+            }
+        }
+        return QLineEdit::inputMethodQuery(
                     arg2); 
     }
 
@@ -380,6 +412,27 @@ namespace lqtk
                     arg2); 
     }
 
+/* -------------------------------------------------------------------------------------------- */
+    void QLineEditWrapper::setVisible(
+                   bool arg2) 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QWidgetWrapper::setVisible1CallArgs args(
+                    this,
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::setVisible1_doLua, &args, "QLineEdit", "setVisible");
+            }
+            if (args.wasCalled) {
+                return;
+            }
+        }
+        return QLineEdit::setVisible(
+                    arg2); 
+    }
+
 } // namespace lqtk
 
 /* ============================================================================================ */
@@ -402,6 +455,7 @@ extern "C" {
     int lqtk_QWidget_height(lua_State* L);
     int lqtk_QWidget_heightForWidth(lua_State* L);
     int lqtk_QWidget_hide(lua_State* L);
+    int lqtk_QWidget_inputMethodQuery(lua_State* L);
     int lqtk_QWidget_mouseDoubleClickEvent(lua_State* L);
     int lqtk_QWidget_mouseMoveEvent(lua_State* L);
     int lqtk_QWidget_mousePressEvent(lua_State* L);
@@ -417,6 +471,15 @@ extern "C" {
     int lqtk_QWidget_setGeometry(lua_State* L);
     int lqtk_QWidget_setLayout(lua_State* L);
     int lqtk_QWidget_setSizePolicy(lua_State* L);
+    int lqtk_QWidget_setStyleSheet(lua_State* L);
+    int lqtk_QWidget_setToolTip(lua_State* L);
+    int lqtk_QWidget_setToolTipDuration(lua_State* L);
+    int lqtk_QWidget_setUpdatesEnabled(lua_State* L);
+    int lqtk_QWidget_setVisible(lua_State* L);
+    int lqtk_QWidget_setWhatsThis(lua_State* L);
+    int lqtk_QWidget_setWindowFilePath(lua_State* L);
+    int lqtk_QWidget_setWindowFlag(lua_State* L);
+    int lqtk_QWidget_setWindowFlags(lua_State* L);
     int lqtk_QWidget_setWindowTitle(lua_State* L);
     int lqtk_QWidget_show(lua_State* L);
     int lqtk_QWidget_size(lua_State* L);
@@ -424,6 +487,11 @@ extern "C" {
     int lqtk_QWidget_sizePolicy(lua_State* L);
     int lqtk_QWidget_update(lua_State* L);
     int lqtk_QWidget_width(lua_State* L);
+    int lqtk_QWidget_windowFlags(lua_State* L);
+    int lqtk_QWidget_windowModality(lua_State* L);
+    int lqtk_QWidget_windowOpacity(lua_State* L);
+    int lqtk_QWidget_windowRole(lua_State* L);
+    int lqtk_QWidget_windowState(lua_State* L);
     int lqtk_QObject_children(lua_State* L);
     int lqtk_QObject_connect(lua_State* L);
     int lqtk_QObject_objectName(lua_State* L);
@@ -480,7 +548,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QLineEdit_new_Args
 {
     explicit lqtk_QLineEdit_new_Args(bool explicitNew)
@@ -515,7 +582,7 @@ static int lqtk_QLineEdit_new_doLua(lua_State* L)
             lua_remove(L, 1);
         }
 
-        QWidgetBinding::intercept_new();
+        QWidgetBinding2::assert_new();
 
         if (nargs == 0) { do {
             {
@@ -644,6 +711,7 @@ static const Member members[] =
     { "height",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_height },
     { "heightForWidth",        Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_heightForWidth },
     { "hide",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_hide },
+    { "inputMethodQuery",      Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_inputMethodQuery },
     { "keyboardGrabber",       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_keyboardGrabber },
     { "mouseDoubleClickEvent", Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseDoubleClickEvent },
     { "mouseGrabber",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_mouseGrabber },
@@ -665,7 +733,16 @@ static const Member members[] =
     { "setObjectName",         Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
     { "setParent",             Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
     { "setSizePolicy",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setSizePolicy },
+    { "setStyleSheet",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setStyleSheet },
     { "setTabOrder",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setTabOrder },
+    { "setToolTip",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setToolTip },
+    { "setToolTipDuration",    Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setToolTipDuration },
+    { "setUpdatesEnabled",     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setUpdatesEnabled },
+    { "setVisible",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_setVisible },
+    { "setWhatsThis",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWhatsThis },
+    { "setWindowFilePath",     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFilePath },
+    { "setWindowFlag",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFlag },
+    { "setWindowFlags",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFlags },
     { "setWindowTitle",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowTitle },
     { "show",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_show },
     { "size",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_size },
@@ -673,6 +750,11 @@ static const Member members[] =
     { "sizePolicy",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizePolicy },
     { "update",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_update },
     { "width",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_width },
+    { "windowFlags",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowFlags },
+    { "windowModality",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowModality },
+    { "windowOpacity",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowOpacity },
+    { "windowRole",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowRole },
+    { "windowState",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowState },
     { NULL,                    Member::NONE,                 NULL } /* sentinel */
 };
 
@@ -693,7 +775,7 @@ const ClassInfo QLineEditBinding::classInfo =
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     setUserValueFunction,
-    45,
+    60,
     members
 };
 

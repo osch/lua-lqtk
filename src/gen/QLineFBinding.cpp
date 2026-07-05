@@ -250,7 +250,7 @@ extern "C" int lqtk_QLineF_intersects(lua_State* L)
             args->arg_1_1.check(L, argOffs+1);
             args->arg_2_1.check(L, argOffs+2);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QLineF::intersects(*args->arg_2_1.getValue());
                 args->rslt_1.push(L);
                 return 1;
@@ -261,7 +261,7 @@ extern "C" int lqtk_QLineF_intersects(lua_State* L)
             args->arg_2_1.check(L, argOffs+2);
             args->arg_3_1.check(L, argOffs+3);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QLineF::intersects(*args->arg_2_1.getValue(), args->arg_3_1.getValue());
                 args->rslt_1.push(L);
                 return 1;
@@ -936,7 +936,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QLineF_new_Args
 {

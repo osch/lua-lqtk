@@ -14,17 +14,6 @@ struct QStringBinding
 {
     typedef QString QType;
 
-    static bool delegate_equals(
-                    QString* arg1,
-                    QString* arg2);
-
-    static bool delegate_equals(
-                    QString* arg1,
-                    QString arg2);
-
-    static QString delegate_toString(
-                    QString* arg1);
-
     static ObjectUdata* pushObject(lua_State* L, QType* obj, OwnerType ownerType);
 
     static const ClassInfo classInfo;

@@ -3,18 +3,22 @@
 
 /* ============================================================================================ */
 
+#include <QAbstractItemModel>
 #include <QAbstractItemView>
 #include <QAbstractScrollArea>
 #include <QCloseEvent>
 #include <QEvent>
 #include <QFrame>
 #include <QHeaderView>
+#include <QItemSelectionModel>
 #include <QMouseEvent>
 #include <QObject>
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <QTreeView>
+#include <QVariant>
 #include <QWidget>
+#include <Qt>
 
 #include <QPointer>
 #include <stdexcept>
@@ -32,23 +36,29 @@
 #include "ToLua.hpp"
 #include "registry.hpp"
 #include "StateGuard.hpp"
+#include "QAbstractItemModelBinding.hpp"
 #include "QAbstractItemViewBinding.hpp"
 #include "QAbstractScrollAreaBinding.hpp"
 #include "QCloseEventBinding.hpp"
 #include "QEventBinding.hpp"
 #include "QFrameBinding.hpp"
 #include "QHeaderViewBinding.hpp"
+#include "QItemSelectionModelBinding.hpp"
 #include "QMouseEventBinding.hpp"
 #include "QObjectBinding.hpp"
 #include "QPaintEventBinding.hpp"
 #include "QResizeEventBinding.hpp"
 #include "QTreeViewBinding.hpp"
+#include "QVariantBinding.hpp"
 #include "QWidgetBinding.hpp"
+#include "QtBinding.hpp"
 #include "QObjectWrapper.hpp"
 #include "QWidgetWrapper.hpp"
 #include "QFrameWrapper.hpp"
 #include "QAbstractScrollAreaWrapper.hpp"
+#include "QAbstractItemViewWrapper.hpp"
 #include "QTreeViewWrapper.hpp"
+#include "QWidgetBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -85,13 +95,27 @@ namespace lqtk
     QTreeViewWrapper::~QTreeViewWrapper() {
         trace::printf("Deleting lqtk::QTreeViewWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QTreeView* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QTreeView");
             }
             StateGuard::releaseRef(&lqtk_stateGuard, StateGuard::FOR_QT_OBJECT);
         }
+    }
+
+    void QTreeViewWrapper::lqtk_QAbstractItemView_resizeEvent(
+                   QResizeEvent* arg1) 
+    {
+        return QAbstractItemView::resizeEvent(
+                   arg1); 
+    }
+
+    void QTreeViewWrapper::lqtk_QAbstractScrollArea_resizeEvent(
+                   QResizeEvent* arg1) 
+    {
+        return QAbstractScrollArea::resizeEvent(
+                   arg1); 
     }
 
     void QTreeViewWrapper::lqtk_QWidget_closeEvent(
@@ -151,6 +175,69 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
+    void QTreeViewWrapper::setModel(
+                   QAbstractItemModel* arg2) 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QAbstractItemViewWrapper::setModel1CallArgs args(
+                    this,
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QAbstractItemViewWrapper::setModel1_doLua, &args, "QTreeView", "setModel");
+            }
+            if (args.wasCalled) {
+                return;
+            }
+        }
+        return QTreeView::setModel(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    void QTreeViewWrapper::setSelectionModel(
+                   QItemSelectionModel* arg2) 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QAbstractItemViewWrapper::setSelectionModel1CallArgs args(
+                    this,
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QAbstractItemViewWrapper::setSelectionModel1_doLua, &args, "QTreeView", "setSelectionModel");
+            }
+            if (args.wasCalled) {
+                return;
+            }
+        }
+        return QTreeView::setSelectionModel(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    void QTreeViewWrapper::resizeEvent(
+                   QResizeEvent* arg2) 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QWidgetWrapper::resizeEvent1CallArgs args(
+                    this,
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::resizeEvent1_doLua, &args, "QTreeView", "resizeEvent");
+            }
+            if (args.wasCalled) {
+                return;
+            }
+        }
+        return QTreeView::resizeEvent(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
     void QTreeViewWrapper::closeEvent(
                    QCloseEvent* arg2) 
     {
@@ -177,12 +264,12 @@ namespace lqtk
     {
         lua_State* L = getL();
         if (L) {
-            QWidgetWrapper::event1CallArgs args(
+            QObjectWrapper::event1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::event1_doLua, &args, "QTreeView", "event");
+                BindingUtil::callLuaMethodImpl(L, QObjectWrapper::event1_doLua, &args, "QTreeView", "event");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -245,6 +332,33 @@ namespace lqtk
             }
         }
         return QTreeView::heightForWidth(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    QVariant QTreeViewWrapper::inputMethodQuery(
+                   Qt::InputMethodQuery arg2) const 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QWidgetWrapper::inputMethodQuery1CallArgs args(
+                    const_cast<QTreeViewWrapper*>(this),
+
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::inputMethodQuery1_doLua, &args, "QTreeView", "inputMethodQuery");
+            }
+            if (args.wasCalled) {
+                if (args.hasValidResult) {
+                    return args.rslt;
+                } else {
+                    const char* msg = "an object of type 'QVariant'";
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "QTreeView", "inputMethodQuery", msg);
+                }
+            }
+        }
+        return QTreeView::inputMethodQuery(
                     arg2); 
     }
 
@@ -354,23 +468,23 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    void QTreeViewWrapper::resizeEvent(
-                   QResizeEvent* arg2) 
+    void QTreeViewWrapper::setVisible(
+                   bool arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            QWidgetWrapper::resizeEvent1CallArgs args(
+            QWidgetWrapper::setVisible1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::resizeEvent1_doLua, &args, "QTreeView", "resizeEvent");
+                BindingUtil::callLuaMethodImpl(L, QWidgetWrapper::setVisible1_doLua, &args, "QTreeView", "setVisible");
             }
             if (args.wasCalled) {
                 return;
             }
         }
-        return QTreeView::resizeEvent(
+        return QTreeView::setVisible(
                     arg2); 
     }
 
@@ -379,6 +493,17 @@ namespace lqtk
 /* ============================================================================================ */
 
 extern "C" {
+    int lqtk_QAbstractItemView_horizontalScrollMode(lua_State* L);
+    int lqtk_QAbstractItemView_model(lua_State* L);
+    int lqtk_QAbstractItemView_resetHorizontalScrollMode(lua_State* L);
+    int lqtk_QAbstractItemView_resetVerticalScrollMode(lua_State* L);
+    int lqtk_QAbstractItemView_resizeEvent(lua_State* L);
+    int lqtk_QAbstractItemView_setAlternatingRowColors(lua_State* L);
+    int lqtk_QAbstractItemView_setHorizontalScrollMode(lua_State* L);
+    int lqtk_QAbstractItemView_setVerticalScrollMode(lua_State* L);
+    int lqtk_QAbstractItemView_verticalScrollMode(lua_State* L);
+    int lqtk_QAbstractScrollArea_setSizeAdjustPolicy(lua_State* L);
+    int lqtk_QAbstractScrollArea_sizeAdjustPolicy(lua_State* L);
     int lqtk_QWidget_keyboardGrabber(lua_State* L);
     int lqtk_QWidget_mouseGrabber(lua_State* L);
     int lqtk_QWidget_setTabOrder(lua_State* L);
@@ -396,6 +521,7 @@ extern "C" {
     int lqtk_QWidget_height(lua_State* L);
     int lqtk_QWidget_heightForWidth(lua_State* L);
     int lqtk_QWidget_hide(lua_State* L);
+    int lqtk_QWidget_inputMethodQuery(lua_State* L);
     int lqtk_QWidget_mouseDoubleClickEvent(lua_State* L);
     int lqtk_QWidget_mouseMoveEvent(lua_State* L);
     int lqtk_QWidget_mousePressEvent(lua_State* L);
@@ -405,12 +531,20 @@ extern "C" {
     int lqtk_QWidget_palette(lua_State* L);
     int lqtk_QWidget_parentWidget(lua_State* L);
     int lqtk_QWidget_resize(lua_State* L);
-    int lqtk_QWidget_resizeEvent(lua_State* L);
     int lqtk_QWidget_setBackgroundRole(lua_State* L);
     int lqtk_QWidget_setFont(lua_State* L);
     int lqtk_QWidget_setGeometry(lua_State* L);
     int lqtk_QWidget_setLayout(lua_State* L);
     int lqtk_QWidget_setSizePolicy(lua_State* L);
+    int lqtk_QWidget_setStyleSheet(lua_State* L);
+    int lqtk_QWidget_setToolTip(lua_State* L);
+    int lqtk_QWidget_setToolTipDuration(lua_State* L);
+    int lqtk_QWidget_setUpdatesEnabled(lua_State* L);
+    int lqtk_QWidget_setVisible(lua_State* L);
+    int lqtk_QWidget_setWhatsThis(lua_State* L);
+    int lqtk_QWidget_setWindowFilePath(lua_State* L);
+    int lqtk_QWidget_setWindowFlag(lua_State* L);
+    int lqtk_QWidget_setWindowFlags(lua_State* L);
     int lqtk_QWidget_setWindowTitle(lua_State* L);
     int lqtk_QWidget_show(lua_State* L);
     int lqtk_QWidget_size(lua_State* L);
@@ -418,6 +552,11 @@ extern "C" {
     int lqtk_QWidget_sizePolicy(lua_State* L);
     int lqtk_QWidget_update(lua_State* L);
     int lqtk_QWidget_width(lua_State* L);
+    int lqtk_QWidget_windowFlags(lua_State* L);
+    int lqtk_QWidget_windowModality(lua_State* L);
+    int lqtk_QWidget_windowOpacity(lua_State* L);
+    int lqtk_QWidget_windowRole(lua_State* L);
+    int lqtk_QWidget_windowState(lua_State* L);
     int lqtk_QObject_children(lua_State* L);
     int lqtk_QObject_connect(lua_State* L);
     int lqtk_QObject_objectName(lua_State* L);
@@ -445,13 +584,137 @@ extern "C" int lqtk_QTreeView_header(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QTreeView::header();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
             }
         } while (false); }
         return util::argCountError(L, "QTreeView", "header", nargs, "1");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QTreeView_setItemsExpandable_Args
+{
+    FromLua<QTreeView*> arg_1_1;
+    FromLua<bool> arg_2_1;
+};
+
+extern "C" int lqtk_QTreeView_setItemsExpandable(lua_State* L)
+{
+    lqtk_QTreeView_setItemsExpandable_Args  argValues;
+    lqtk_QTreeView_setItemsExpandable_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QTreeView::setItemsExpandable(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QTreeView", "setItemsExpandable", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QTreeView_setModel_Args
+{
+    FromLua<QTreeView*> arg_1_1;
+    FromLua<QAbstractItemModel*> arg_2_1;
+};
+
+extern "C" int lqtk_QTreeView_setModel(lua_State* L)
+{
+    lqtk_QTreeView_setModel_Args  argValues;
+    lqtk_QTreeView_setModel_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QTreeView::setModel(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QTreeView", "setModel", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QTreeView_setRootIsDecorated_Args
+{
+    FromLua<QTreeView*> arg_1_1;
+    FromLua<bool> arg_2_1;
+};
+
+extern "C" int lqtk_QTreeView_setRootIsDecorated(lua_State* L)
+{
+    lqtk_QTreeView_setRootIsDecorated_Args  argValues;
+    lqtk_QTreeView_setRootIsDecorated_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QTreeView::setRootIsDecorated(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QTreeView", "setRootIsDecorated", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QTreeView_setSelectionModel_Args
+{
+    FromLua<QTreeView*> arg_1_1;
+    FromLua<QItemSelectionModel*> arg_2_1;
+};
+
+extern "C" int lqtk_QTreeView_setSelectionModel(lua_State* L)
+{
+    lqtk_QTreeView_setSelectionModel_Args  argValues;
+    lqtk_QTreeView_setSelectionModel_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QTreeView::setSelectionModel(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QTreeView", "setSelectionModel", nargs, "2");
     }
     catch (...) {
         return util::handleException(L);
@@ -515,7 +778,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QTreeView_new_Args
 {
     FromLua<QWidget*> arg_1_1;
@@ -544,7 +806,7 @@ extern "C" int lqtk_QTreeView_constructor(lua_State* L, bool explicitNew)
             lua_remove(L, 1);
         }
 
-        QWidgetBinding::intercept_new();
+        QWidgetBinding2::assert_new();
 
         if (nargs == 0) { do {
             {
@@ -617,53 +879,91 @@ ObjectUdata* QTreeViewBinding::pushObject(lua_State* L, QTreeView* objPtr, Owner
 
 static const Member members[] =
 {
-    { "acceptDrops",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_acceptDrops },
-    { "accessibleDescription", Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleDescription },
-    { "accessibleIdentifier",  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleIdentifier },
-    { "accessibleName",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleName },
-    { "addActions",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_addActions },
-    { "children",              Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
-    { "close",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_close },
-    { "closeEvent",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_closeEvent },
-    { "connect",               Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
-    { "event",                 Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_event },
-    { "font",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_font },
-    { "geometry",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_geometry },
-    { "hasHeightForWidth",     Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_hasHeightForWidth },
-    { "header",                Member::NORMAL_FUNCTION,      (void*) lqtk_QTreeView_header },
-    { "height",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_height },
-    { "heightForWidth",        Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_heightForWidth },
-    { "hide",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_hide },
-    { "keyboardGrabber",       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_keyboardGrabber },
-    { "mouseDoubleClickEvent", Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseDoubleClickEvent },
-    { "mouseGrabber",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_mouseGrabber },
-    { "mouseMoveEvent",        Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseMoveEvent },
-    { "mousePressEvent",       Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mousePressEvent },
-    { "mouseReleaseEvent",     Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseReleaseEvent },
-    { "move",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_move },
-    { "objectName",            Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
-    { "paintEvent",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_paintEvent },
-    { "palette",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_palette },
-    { "parent",                Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
-    { "parentWidget",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_parentWidget },
-    { "resize",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_resize },
-    { "resizeEvent",           Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_resizeEvent },
-    { "setBackgroundRole",     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setBackgroundRole },
-    { "setFont",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setFont },
-    { "setGeometry",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setGeometry },
-    { "setLayout",             Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setLayout },
-    { "setObjectName",         Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
-    { "setParent",             Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
-    { "setSizePolicy",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setSizePolicy },
-    { "setTabOrder",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setTabOrder },
-    { "setWindowTitle",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowTitle },
-    { "show",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_show },
-    { "size",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_size },
-    { "sizeHint",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizeHint },
-    { "sizePolicy",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizePolicy },
-    { "update",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_update },
-    { "width",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_width },
-    { NULL,                    Member::NONE,                 NULL } /* sentinel */
+    { "AdjustIgnored",               Member::INTEGER,              (void*) QTreeView::AdjustIgnored },
+    { "AdjustToContents",            Member::INTEGER,              (void*) QTreeView::AdjustToContents },
+    { "AdjustToContentsOnFirstShow", Member::INTEGER,              (void*) QTreeView::AdjustToContentsOnFirstShow },
+    { "EnsureVisible",               Member::INTEGER,              (void*) QTreeView::EnsureVisible },
+    { "PositionAtBottom",            Member::INTEGER,              (void*) QTreeView::PositionAtBottom },
+    { "PositionAtCenter",            Member::INTEGER,              (void*) QTreeView::PositionAtCenter },
+    { "PositionAtTop",               Member::INTEGER,              (void*) QTreeView::PositionAtTop },
+    { "ScrollPerItem",               Member::INTEGER,              (void*) QTreeView::ScrollPerItem },
+    { "ScrollPerPixel",              Member::INTEGER,              (void*) QTreeView::ScrollPerPixel },
+    { "acceptDrops",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_acceptDrops },
+    { "accessibleDescription",       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleDescription },
+    { "accessibleIdentifier",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleIdentifier },
+    { "accessibleName",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_accessibleName },
+    { "addActions",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_addActions },
+    { "children",                    Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
+    { "close",                       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_close },
+    { "closeEvent",                  Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_closeEvent },
+    { "connect",                     Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
+    { "event",                       Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_event },
+    { "font",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_font },
+    { "geometry",                    Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_geometry },
+    { "hasHeightForWidth",           Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_hasHeightForWidth },
+    { "header",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QTreeView_header },
+    { "height",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_height },
+    { "heightForWidth",              Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_heightForWidth },
+    { "hide",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_hide },
+    { "horizontalScrollMode",        Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemView_horizontalScrollMode },
+    { "inputMethodQuery",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_inputMethodQuery },
+    { "keyboardGrabber",             Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_keyboardGrabber },
+    { "model",                       Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemView_model },
+    { "mouseDoubleClickEvent",       Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseDoubleClickEvent },
+    { "mouseGrabber",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_mouseGrabber },
+    { "mouseMoveEvent",              Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseMoveEvent },
+    { "mousePressEvent",             Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mousePressEvent },
+    { "mouseReleaseEvent",           Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseReleaseEvent },
+    { "move",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_move },
+    { "objectName",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
+    { "paintEvent",                  Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_paintEvent },
+    { "palette",                     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_palette },
+    { "parent",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
+    { "parentWidget",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_parentWidget },
+    { "resetHorizontalScrollMode",   Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemView_resetHorizontalScrollMode },
+    { "resetVerticalScrollMode",     Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemView_resetVerticalScrollMode },
+    { "resize",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_resize },
+    { "resizeEvent",                 Member::VIRTUAL_FUNCTION,     (void*) lqtk_QAbstractItemView_resizeEvent },
+    { "setAlternatingRowColors",     Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemView_setAlternatingRowColors },
+    { "setBackgroundRole",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setBackgroundRole },
+    { "setFont",                     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setFont },
+    { "setGeometry",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setGeometry },
+    { "setHorizontalScrollMode",     Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemView_setHorizontalScrollMode },
+    { "setItemsExpandable",          Member::NORMAL_FUNCTION,      (void*) lqtk_QTreeView_setItemsExpandable },
+    { "setLayout",                   Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setLayout },
+    { "setModel",                    Member::VIRTUAL_FUNCTION,     (void*) lqtk_QTreeView_setModel },
+    { "setObjectName",               Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
+    { "setParent",                   Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
+    { "setRootIsDecorated",          Member::NORMAL_FUNCTION,      (void*) lqtk_QTreeView_setRootIsDecorated },
+    { "setSelectionModel",           Member::VIRTUAL_FUNCTION,     (void*) lqtk_QTreeView_setSelectionModel },
+    { "setSizeAdjustPolicy",         Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractScrollArea_setSizeAdjustPolicy },
+    { "setSizePolicy",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setSizePolicy },
+    { "setStyleSheet",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setStyleSheet },
+    { "setTabOrder",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setTabOrder },
+    { "setToolTip",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setToolTip },
+    { "setToolTipDuration",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setToolTipDuration },
+    { "setUpdatesEnabled",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setUpdatesEnabled },
+    { "setVerticalScrollMode",       Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemView_setVerticalScrollMode },
+    { "setVisible",                  Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_setVisible },
+    { "setWhatsThis",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWhatsThis },
+    { "setWindowFilePath",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFilePath },
+    { "setWindowFlag",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFlag },
+    { "setWindowFlags",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFlags },
+    { "setWindowTitle",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowTitle },
+    { "show",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_show },
+    { "size",                        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_size },
+    { "sizeAdjustPolicy",            Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractScrollArea_sizeAdjustPolicy },
+    { "sizeHint",                    Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizeHint },
+    { "sizePolicy",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizePolicy },
+    { "update",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_update },
+    { "verticalScrollMode",          Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemView_verticalScrollMode },
+    { "width",                       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_width },
+    { "windowFlags",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowFlags },
+    { "windowModality",              Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowModality },
+    { "windowOpacity",               Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowOpacity },
+    { "windowRole",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowRole },
+    { "windowState",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowState },
+    { NULL,                          Member::NONE,                 NULL } /* sentinel */
 };
 
 /* ============================================================================================ */
@@ -683,7 +983,7 @@ const ClassInfo QTreeViewBinding::classInfo =
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     setUserValueFunction,
-    46,
+    84,
     members
 };
 

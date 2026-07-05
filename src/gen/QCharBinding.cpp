@@ -52,7 +52,7 @@ extern "C" int lqtk_QChar_category(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QChar::category();
                 args->rslt_1.push(L);
                 return 1;
@@ -61,7 +61,7 @@ extern "C" int lqtk_QChar_category(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_2_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QChar::category(args->arg_2_1.getValue());
                 args->rslt_1.push(L);
                 return 1;
@@ -141,7 +141,7 @@ extern "C" int lqtk_QChar_currentUnicodeVersion(lua_State* L)
         int nargs = lua_gettop(L);
         if (nargs == 0) { do {
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QChar::currentUnicodeVersion();
                 args->rslt_1.push(L);
                 return 1;
@@ -231,7 +231,7 @@ extern "C" int lqtk_QChar_decompositionTag(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QChar::decompositionTag();
                 args->rslt_1.push(L);
                 return 1;
@@ -240,7 +240,7 @@ extern "C" int lqtk_QChar_decompositionTag(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_2_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QChar::decompositionTag(args->arg_2_1.getValue());
                 args->rslt_1.push(L);
                 return 1;
@@ -323,7 +323,7 @@ extern "C" int lqtk_QChar_direction(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QChar::direction();
                 args->rslt_1.push(L);
                 return 1;
@@ -332,7 +332,7 @@ extern "C" int lqtk_QChar_direction(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_2_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QChar::direction(args->arg_2_1.getValue());
                 args->rslt_1.push(L);
                 return 1;
@@ -1251,7 +1251,7 @@ extern "C" int lqtk_QChar_joiningType(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QChar::joiningType();
                 args->rslt_1.push(L);
                 return 1;
@@ -1260,7 +1260,7 @@ extern "C" int lqtk_QChar_joiningType(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_2_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QChar::joiningType(args->arg_2_1.getValue());
                 args->rslt_1.push(L);
                 return 1;
@@ -1408,7 +1408,7 @@ extern "C" int lqtk_QChar_script(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QChar::script();
                 args->rslt_1.push(L);
                 return 1;
@@ -1417,7 +1417,7 @@ extern "C" int lqtk_QChar_script(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_2_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QChar::script(args->arg_2_1.getValue());
                 args->rslt_1.push(L);
                 return 1;
@@ -1693,7 +1693,7 @@ extern "C" int lqtk_QChar_unicodeVersion(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QChar::unicodeVersion();
                 args->rslt_1.push(L);
                 return 1;
@@ -1702,7 +1702,7 @@ extern "C" int lqtk_QChar_unicodeVersion(lua_State* L)
         if (nargs == 1) { do {
             if (!args->arg_2_1.test(L, argOffs+1)) break;
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QChar::unicodeVersion(args->arg_2_1.getValue());
                 args->rslt_1.push(L);
                 return 1;
@@ -1904,7 +1904,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QChar_new_Args
 {

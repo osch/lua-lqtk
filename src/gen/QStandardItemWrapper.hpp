@@ -16,14 +16,12 @@ public:
     QStandardItemWrapper();
     QStandardItemWrapper(
                    QString arg1); 
-
-/* -------------------------------------------------------------------------------------------- */
-
     ~QStandardItemWrapper();
-
     ObjectGuard* lqtk_getObjectGuard() const {
         return ObjectGuard::Holder<QStandardItem>::lqtk_getObjectGuard();
     }
+
+/* -------------------------------------------------------------------------------------------- */
 
 };
 

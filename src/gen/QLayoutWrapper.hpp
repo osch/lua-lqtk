@@ -23,9 +23,8 @@ private:
 public:
     ~QLayoutWrapper();
 
-
-
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct addItem1CallArgs : BindingUtil::CallArgs {
         addItem1CallArgs(
@@ -46,6 +45,7 @@ public:
                    QLayoutItem* arg2) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct count1CallArgs : BindingUtil::CallArgs {
         count1CallArgs(
@@ -65,6 +65,7 @@ public:
     int count() const override;
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct geometry1CallArgs : BindingUtil::CallArgs {
         geometry1CallArgs(
@@ -85,6 +86,7 @@ public:
     QRect geometry() const override;
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct itemAt1CallArgs : BindingUtil::CallArgs {
         itemAt1CallArgs(
@@ -108,6 +110,7 @@ public:
                    int arg2) const override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct setGeometry1CallArgs : BindingUtil::CallArgs {
         setGeometry1CallArgs(
@@ -128,6 +131,7 @@ public:
                    const QRect& arg2) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct sizeHint1CallArgs : BindingUtil::CallArgs {
         sizeHint1CallArgs(
@@ -148,6 +152,7 @@ public:
     QSize sizeHint() const override;
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct takeAt1CallArgs : BindingUtil::CallArgs {
         takeAt1CallArgs(
@@ -169,8 +174,6 @@ public:
 public:
     QLayoutItem* takeAt(
                    int arg2) override; 
-
-/* -------------------------------------------------------------------------------------------- */
 public:
     bool event(
                    QEvent* arg2) override; 
@@ -180,13 +183,16 @@ public:
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
     }
 public:
     StateGuard* lqtk_stateGuard;
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

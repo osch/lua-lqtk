@@ -36,15 +36,19 @@ local bindings = {}
 
 local hasConstructorSet = {}
 local hasVirtualMemberSet = {}
+local hasOwnVirtualMemberSet = {}
+local hasOwnProtectedMemberSet = {}
 local needsGuardSet = {}
 local needsValidityCheckSet = {}
 local hasConstructorProxySet = {}
 
 function needsWrapper(bindingName)
-    return hasConstructorSet[bindingName] and (   hasVirtualMemberSet[bindingName] 
-                                               or needsGuardSet[bindingName]
-                                               or needsValidityCheckSet[bindingName]
-                                               or hasConstructorProxySet[bindingName])
+    return   hasConstructorSet[bindingName] and (   hasVirtualMemberSet[bindingName] 
+                                                 or needsGuardSet[bindingName]
+                                                 or needsValidityCheckSet[bindingName]
+                                                 or hasConstructorProxySet[bindingName])
+      or not hasConstructorSet[bindingName] and (   hasOwnVirtualMemberSet[bindingName] 
+                                                 or hasOwnProtectedMemberSet[bindingName])
 end
 
 function getBinding(name, ignoreErrors)
@@ -86,6 +90,10 @@ function getBinding(name, ignoreErrors)
                             b[v] = true
                             if isOneOf(v, "virtual", "=0", "override", "protected") then
                                 hasVirtualMemberSet[name] = true
+                                hasOwnVirtualMemberSet[name] = true
+                            end
+                            if v == "protected" and frombase then
+                                hasOwnProtectedMemberSet[name] = true
                             end
                         end
                     end

@@ -2,6 +2,7 @@
 #define LQTK_STATE_GUARD_HPP
 
 class QApplication;
+class QCoreApplication;
 
 namespace lqtk 
 {
@@ -64,7 +65,7 @@ public:
     };
 
     static StateGuard* acquireRef(StateGuard* guard, RefType refType) {
-        guard->refCount += 1;
+        guard->refCount.ref();
         switch (refType) {
             case FOR_QT_OBJECT: guard->qtObjectCount += 1; break;
             case FOR_LISTENER:  guard->listenerCount += 1; break;
@@ -72,7 +73,7 @@ public:
         return guard;
     }
     
-    static void releaseRef(StateGuard** guardp, RefType refType) {
+    static int releaseRef(StateGuard** guardp, RefType refType) {
         if (guardp) {
             StateGuard* guard = *guardp;
             if (guard) {
@@ -80,30 +81,39 @@ public:
                     case FOR_QT_OBJECT: guard->qtObjectCount -= 1; break;
                     case FOR_LISTENER:  guard->listenerCount -= 1; break;
                 }
-                guard->refCount -= 1;
-                if (guard->refCount <= 0) {
+                int newValue = --guard->refCount;
+                if (newValue <= 0) {
                     delete guard;
                 }
                 *guardp = nullptr;
+                return newValue;
             }
         }
+        return 0;
     }
     
-    int getRefCount() const {
-        return refCount;
+    lua_State* getL() const {
+        return L;
     }
-
-public:
+    QCoreApplication* getQApplication() const {
+        return qapp;
+    }
+    void setQApplication(QCoreApplication* app) {
+        this->qapp = app;
+    }
+    
+private:
+    class Impl;
+    
     lua_State* L;
     int stateRef;
     
     int qtObjectCount;
     int listenerCount;
     
-    QApplication* qapp;
+    QCoreApplication* qapp;
     
-private:
-    int refCount;
+    QAtomicInt refCount;
 };
 
 

@@ -26,6 +26,7 @@
 #include "QObjectBinding.hpp"
 #include "QPointBinding.hpp"
 #include "QStringBinding.hpp"
+#include "QPointBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -53,9 +54,7 @@ extern "C" int lqtk_QPoint_equals(lua_State* L)
             args->arg_1_1.check(L, argOffs+1);
             args->arg_1_2.check(L, argOffs+2);
             {
-                args->rslt_1 = 
-                    QPointBinding::delegate_equals(args->arg_1_1.getValue(), args->arg_1_2.getValue());
-                args->rslt_1.push(L);
+                QPointBinding2::delegate_equals(L, argOffs, 2, &args->rslt_1, args->arg_1_1.getValue(), args->arg_1_2.getValue());
                 return 1;
             }
         } while (false); }
@@ -85,9 +84,7 @@ static int lqtk_QPoint_toString_doLua(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 = 
-                    QPointBinding::delegate_toString(args->arg_1_1.getValue());
-                args->rslt_1.push(L);
+                QPointBinding2::delegate_toString(L, argOffs, 1, &args->rslt_1, args->arg_1_1.getValue());
                 return 1;
             }
         } while (false); }
@@ -198,7 +195,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QPoint_new_Args
 {

@@ -10,8 +10,10 @@
 #include "util.hpp"
 
 #include "ClassInfo.hpp"
-#include "QByteArrayBinding.hpp"
 #include "FromLua.hpp"
+#include "ToLua.hpp"
+#include "QByteArrayBinding.hpp"
+#include "QByteArrayBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -19,24 +21,17 @@ using namespace lqtk;
 
 /* ============================================================================================ */
 
-QByteArray* QByteArrayBinding::delegate_fromBase64Encoding(QByteArray b)
+void QByteArrayBinding2::delegate_fromBase64Encoding(lua_State* L, int argOffs, 
+                                                                   int nargs, 
+                                                                   ToLua<QByteArray*>* rslt, QByteArray b, QByteArray::Base64Options o)
 {
-    QByteArray* rsltP = nullptr;
-    QByteArray::FromBase64Result rslt = QByteArray::fromBase64Encoding(b);
-    if (rslt) {
-        rsltP = new QByteArray(*rslt);
+    QByteArray::FromBase64Result base64Rslt = QByteArray::fromBase64Encoding(b, o);
+    if (base64Rslt) {
+        *rslt = *base64Rslt;
+        rslt->push(L, IS_OWNER);
+    } else {
+        lua_pushnil(L);
     }
-    return rsltP;
-}
-
-QByteArray* QByteArrayBinding::delegate_fromBase64Encoding(QByteArray b, QByteArray::Base64Options o)
-{
-    QByteArray* rsltP = nullptr;
-    QByteArray::FromBase64Result rslt = QByteArray::fromBase64Encoding(b, o);
-    if (rslt) {
-        rsltP = new QByteArray(*rslt);
-    }
-    return rsltP;
 }
 
 extern "C" int lqtk_QByteArray_toDouble(lua_State* L)
@@ -80,12 +75,15 @@ extern "C" int lqtk_QByteArray_toString(lua_State* L)
     return 1;
 }
 
-bool QByteArrayBinding::delegate_equals(QByteArray* arg1, QByteArray* arg2)
+void QByteArrayBinding2::delegate_equals(lua_State* L, int argOffs, 
+                                                       int nargs, 
+                                                       ToLua<bool>* rslt, QByteArray* arg1, QByteArray* arg2)
 {
     if (arg1 && arg2) {
-        return *arg1 == *arg2;
+        *rslt = (*arg1 == *arg2);
     }
     else {
-        return arg1 == arg2;
+        *rslt = (arg1 == arg2);
     }
+    rslt->push(L);
 }

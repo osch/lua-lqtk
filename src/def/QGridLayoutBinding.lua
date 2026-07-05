@@ -15,7 +15,25 @@ elements = {
     {
         method    = "addItem",
         binding   = {
-            { "void", { "QLayoutItem*" }, "protected" },
+            { "void", { "QLayoutItem*" }, "virtual", "protected" },
+        }
+    },
+    {
+        method    = "addLayout",
+        binding   = {
+            { "void", { "QLayout*", "int", "int" } },
+            { "void", { "QLayout*", "int", "int", "Qt::Alignment" } },
+            { "void", { "QLayout*", "int", "int", "int", "int" } },
+            { "void", { "QLayout*", "int", "int", "int", "int", "Qt::Alignment" } },
+        }
+    },
+    {
+        method    = "addWidget",
+        binding   = {
+            { "void", { "QWidget*", "int", "int" } },
+            { "void", { "QWidget*", "int", "int", "Qt::Alignment" } },
+            { "void", { "QWidget*", "int", "int", "int", "int" } },
+            { "void", { "QWidget*", "int", "int", "int", "int", "Qt::Alignment" } },
         }
     },
     {

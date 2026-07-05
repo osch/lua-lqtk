@@ -897,7 +897,7 @@ extern "C" int lqtk_QPainterPath_fillRule(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QPainterPath::fillRule();
                 args->rslt_1.push(L);
                 return 1;
@@ -1786,7 +1786,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QPainterPath_new_Args
 {

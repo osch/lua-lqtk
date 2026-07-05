@@ -24,14 +24,12 @@ public:
                    QSize arg1); 
     QPixmapWrapper(
                    QPixmap arg1); 
-
-/* -------------------------------------------------------------------------------------------- */
-
     ~QPixmapWrapper();
-
     ObjectGuard* lqtk_getObjectGuard() const {
         return ObjectGuard::Holder<QPixmap>::lqtk_getObjectGuard();
     }
+
+/* -------------------------------------------------------------------------------------------- */
 
 };
 

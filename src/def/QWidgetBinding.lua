@@ -6,7 +6,7 @@ elements = {
     --------------------------------------------------------------------------------------------------------------------------------------------------
     {
         func      = "new",
-        intercept = true,
+        assert    = true,
         binding   = {
             { "QWidget*", {} },
             { "QWidget*", { "QWidget?" } },
@@ -118,27 +118,33 @@ elements = {
         }
     },
     {
+        method    = "inputMethodQuery",
+        binding   = {
+            { "QVariant", { "Qt::InputMethodQuery" }, "virtual", "const" },
+        }
+    },
+    {
         method    = "mouseDoubleClickEvent",
         binding   = {
-            { "void", { "QMouseEvent~" }, "protected" },
+            { "void", { "QMouseEvent~" }, "virtual", "protected" },
         }
     },
     {
         method    = "mouseMoveEvent",
         binding   = {
-            { "void", { "QMouseEvent~" }, "protected" },
+            { "void", { "QMouseEvent~" }, "virtual", "protected" },
         }
     },
     {
         method    = "mousePressEvent",
         binding   = {
-            { "void", { "QMouseEvent~" }, "protected" },
+            { "void", { "QMouseEvent~" }, "virtual", "protected" },
         }
     },
     {
         method    = "mouseReleaseEvent",
         binding   = {
-            { "void", { "QMouseEvent~" }, "protected" },
+            { "void", { "QMouseEvent~" }, "virtual", "protected" },
         }
     },
     {
@@ -151,7 +157,7 @@ elements = {
     {
         method    = "paintEvent",
         binding   = {
-            { "void", { "QPaintEvent~" }, "protected" },
+            { "void", { "QPaintEvent~" }, "virtual", "protected" },
         }
     },
     {
@@ -176,7 +182,7 @@ elements = {
     {
         method    = "resizeEvent",
         binding   = {
-            { "void", { "QResizeEvent~" }, "protected" },
+            { "void", { "QResizeEvent~" }, "virtual", "protected" },
         }
     },
     {
@@ -207,6 +213,61 @@ elements = {
         method    = "setSizePolicy",
         binding   = {
             { "void", { "QSizePolicy" } },
+        }
+    },
+    {
+        method    = "setStyleSheet",
+        binding   = {
+            { "void", { "QString" } },
+        }
+    },
+    {
+        method    = "setToolTip",
+        binding   = {
+            { "void", { "QString" } },
+        }
+    },
+    {
+        method    = "setToolTipDuration",
+        binding   = {
+            { "void", { "int" } },
+        }
+    },
+    {
+        method    = "setUpdatesEnabled",
+        binding   = {
+            { "void", { "bool" } },
+        }
+    },
+    {
+        method    = "setVisible",
+        binding   = {
+            { "void", { "bool" }, "virtual" },
+        }
+    },
+    {
+        method    = "setWhatsThis",
+        binding   = {
+            { "void", { "QString" } },
+        }
+    },
+    {
+        method    = "setWindowFilePath",
+        binding   = {
+            { "void", { "QString" } },
+        }
+    },
+    {
+        method    = "setWindowFlag",
+        binding   = {
+            { "void", { "Qt::WindowType" } },
+            { "void", { "Qt::WindowType", "bool" } },
+        }
+    },
+    {
+        method    = "setWindowFlags",
+        binding   = {
+            { "void", { "Qt::WindowFlags" } },
         }
     },
     {
@@ -249,6 +310,36 @@ elements = {
         method    = "width",
         binding   = {
             { "int", {} },
+        }
+    },
+    {
+        method    = "windowFlags",
+        binding   = {
+            { "Qt::WindowFlags", {} },
+        }
+    },
+    {
+        method    = "windowModality",
+        binding   = {
+            { "Qt::WindowModality", {} },
+        }
+    },
+    {
+        method    = "windowOpacity",
+        binding   = {
+            { "double", {} },
+        }
+    },
+    {
+        method    = "windowRole",
+        binding   = {
+            { "QString", {} },
+        }
+    },
+    {
+        method    = "windowState",
+        binding   = {
+            { "Qt::WindowStates", {} },
         }
     },
     --------------------------------------------------------------------------------------------------------------------------------------------------

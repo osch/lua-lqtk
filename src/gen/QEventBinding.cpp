@@ -5,7 +5,10 @@
 
 #include <QCloseEvent>
 #include <QEvent>
+#include <QFocusEvent>
+#include <QHideEvent>
 #include <QInputEvent>
+#include <QInputMethodEvent>
 #include <QObject>
 #include <QPaintEvent>
 #include <QResizeEvent>
@@ -30,7 +33,10 @@
 #include "StateGuard.hpp"
 #include "QCloseEventBinding.hpp"
 #include "QEventBinding.hpp"
+#include "QFocusEventBinding.hpp"
+#include "QHideEventBinding.hpp"
 #include "QInputEventBinding.hpp"
+#include "QInputMethodEventBinding.hpp"
 #include "QObjectBinding.hpp"
 #include "QPaintEventBinding.hpp"
 #include "QResizeEventBinding.hpp"
@@ -182,7 +188,7 @@ extern "C" int lqtk_QEvent_type(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QEvent::type();
                 args->rslt_1.push(L);
                 return 1;
@@ -211,41 +217,43 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 
 /* ============================================================================================ */
 
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QEvent* ptr = (QEvent*) objectPtr;
-        delete ptr;
-    }
-}
-
-/* ============================================================================================ */
-
 ObjectUdata* QEventBinding::pushObject(lua_State* L, QEvent* objPtr, OwnerType ownerType)
 {
         QCloseEvent* ptr1 = dynamic_cast<QCloseEvent*>(objPtr);
         if (ptr1) {
             return QCloseEventBinding::pushObject(L, ptr1, ownerType);
         }
-        QInputEvent* ptr2 = dynamic_cast<QInputEvent*>(objPtr);
+        QFocusEvent* ptr2 = dynamic_cast<QFocusEvent*>(objPtr);
         if (ptr2) {
-            return QInputEventBinding::pushObject(L, ptr2, ownerType);
+            return QFocusEventBinding::pushObject(L, ptr2, ownerType);
         }
-        QPaintEvent* ptr3 = dynamic_cast<QPaintEvent*>(objPtr);
+        QHideEvent* ptr3 = dynamic_cast<QHideEvent*>(objPtr);
         if (ptr3) {
-            return QPaintEventBinding::pushObject(L, ptr3, ownerType);
+            return QHideEventBinding::pushObject(L, ptr3, ownerType);
         }
-        QResizeEvent* ptr4 = dynamic_cast<QResizeEvent*>(objPtr);
+        QInputEvent* ptr4 = dynamic_cast<QInputEvent*>(objPtr);
         if (ptr4) {
-            return QResizeEventBinding::pushObject(L, ptr4, ownerType);
+            return QInputEventBinding::pushObject(L, ptr4, ownerType);
         }
-        QShowEvent* ptr5 = dynamic_cast<QShowEvent*>(objPtr);
+        QInputMethodEvent* ptr5 = dynamic_cast<QInputMethodEvent*>(objPtr);
         if (ptr5) {
-            return QShowEventBinding::pushObject(L, ptr5, ownerType);
+            return QInputMethodEventBinding::pushObject(L, ptr5, ownerType);
         }
-        QTimerEvent* ptr6 = dynamic_cast<QTimerEvent*>(objPtr);
+        QPaintEvent* ptr6 = dynamic_cast<QPaintEvent*>(objPtr);
         if (ptr6) {
-            return QTimerEventBinding::pushObject(L, ptr6, ownerType);
+            return QPaintEventBinding::pushObject(L, ptr6, ownerType);
+        }
+        QResizeEvent* ptr7 = dynamic_cast<QResizeEvent*>(objPtr);
+        if (ptr7) {
+            return QResizeEventBinding::pushObject(L, ptr7, ownerType);
+        }
+        QShowEvent* ptr8 = dynamic_cast<QShowEvent*>(objPtr);
+        if (ptr8) {
+            return QShowEventBinding::pushObject(L, ptr8, ownerType);
+        }
+        QTimerEvent* ptr9 = dynamic_cast<QTimerEvent*>(objPtr);
+        if (ptr9) {
+            return QTimerEventBinding::pushObject(L, ptr9, ownerType);
         }
     StateGuard::pushWeakUdataRef(L, objPtr);                             // -> udata?
     ObjectUdata* udata = ObjectUdata::testArg(L, -1);  
@@ -446,7 +454,7 @@ const ClassInfo QEventBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction

@@ -228,7 +228,7 @@ extern "C" int lqtk_QBrush_style(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QBrush::style();
                 args->rslt_1.push(L);
                 return 1;
@@ -298,7 +298,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QBrush_new_Args
 {

@@ -545,7 +545,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QRegion_new_Args
 {
     FromLua<int> arg_1_1;

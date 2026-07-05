@@ -26,6 +26,7 @@
 #include "QByteArrayBinding.hpp"
 #include "QObjectBinding.hpp"
 #include "QtBinding.hpp"
+#include "QByteArrayBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -106,9 +107,7 @@ static int lqtk_QByteArray_fromBase64Encoding_doLua(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 = 
-                    QByteArrayBinding::delegate_fromBase64Encoding(*args->arg_1_1.getValue());
-                args->rslt_1.push(L, IS_OWNER);
+                QByteArrayBinding2::delegate_fromBase64Encoding(L, argOffs, 1, &args->rslt_1, *args->arg_1_1.getValue());
                 return 1;
             }
         } while (false); }
@@ -116,9 +115,7 @@ static int lqtk_QByteArray_fromBase64Encoding_doLua(lua_State* L)
             args->arg_1_1.check(L, argOffs+1);
             args->arg_2_1.check(L, argOffs+2);
             {
-                args->rslt_1 = 
-                    QByteArrayBinding::delegate_fromBase64Encoding(*args->arg_1_1.getValue(), args->arg_2_1.getValue());
-                args->rslt_1.push(L, IS_OWNER);
+                QByteArrayBinding2::delegate_fromBase64Encoding(L, argOffs, 2, &args->rslt_1, *args->arg_1_1.getValue(), args->arg_2_1.getValue());
                 return 1;
             }
         } while (false); }
@@ -805,9 +802,7 @@ extern "C" int lqtk_QByteArray_equals(lua_State* L)
             args->arg_1_1.check(L, argOffs+1);
             args->arg_1_2.check(L, argOffs+2);
             {
-                args->rslt_1 = 
-                    QByteArrayBinding::delegate_equals(args->arg_1_1.getValue(), args->arg_1_2.getValue());
-                args->rslt_1.push(L);
+                QByteArrayBinding2::delegate_equals(L, argOffs, 2, &args->rslt_1, args->arg_1_1.getValue(), args->arg_1_2.getValue());
                 return 1;
             }
         } while (false); }
@@ -2685,7 +2680,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QByteArray_new_Args
 {

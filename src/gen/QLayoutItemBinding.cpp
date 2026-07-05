@@ -49,16 +49,6 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 
 /* ============================================================================================ */
 
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QLayoutItem* ptr = (QLayoutItem*) objectPtr;
-        delete ptr;
-    }
-}
-
-/* ============================================================================================ */
-
 ObjectUdata* QLayoutItemBinding::pushObject(lua_State* L, QLayoutItem* objPtr, OwnerType ownerType)
 {
         QWidgetItem* ptr1 = dynamic_cast<QWidgetItem*>(objPtr);
@@ -89,7 +79,7 @@ const ClassInfo QLayoutItemBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction

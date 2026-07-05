@@ -35,6 +35,7 @@
 #include "QApplicationWrapperBase.hpp"
 #include "QObjectWrapper.hpp"
 #include "QApplicationWrapper.hpp"
+#include "QApplicationBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -69,7 +70,7 @@ namespace lqtk
     QApplicationWrapper::~QApplicationWrapper() {
         trace::printf("Deleting lqtk::QApplicationWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QApplication* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QApplication");
@@ -86,42 +87,17 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QApplicationWrapper::event1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        event1CallArgs* args = (event1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "event") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L, NOT_OWNER);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                args->hasValidResult = args->rslt.test(L, -1);
-            }
-        }
-        return 0;
-    }
-
     bool QApplicationWrapper::event(
                    QEvent* arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            event1CallArgs args(
+            QObjectWrapper::event1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, event1_doLua, &args, "QApplication", "event");
+                BindingUtil::callLuaMethodImpl(L, QObjectWrapper::event1_doLua, &args, "QApplication", "event");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -141,6 +117,11 @@ namespace lqtk
 /* ============================================================================================ */
 
 extern "C" {
+    int lqtk_QCoreApplication_applicationDirPath(lua_State* L);
+    int lqtk_QCoreApplication_applicationFilePath(lua_State* L);
+    int lqtk_QCoreApplication_applicationName(lua_State* L);
+    int lqtk_QCoreApplication_applicationPid(lua_State* L);
+    int lqtk_QCoreApplication_applicationVersion(lua_State* L);
     int lqtk_QCoreApplication_instance(lua_State* L);
     int lqtk_QCoreApplication_processEvents(lua_State* L);
     int lqtk_QCoreApplication_sendPostedEvents(lua_State* L);
@@ -347,13 +328,9 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 
 /* ============================================================================================ */
 
-extern "C" int lqtk_QApplication_constructor(lua_State* L, bool explicitNew);
-
-/* ============================================================================================ */
-
 extern "C" int lqtk_QApplication_new(lua_State* L)
 {
-    return lqtk_QApplication_constructor(L, true /*explicitNew*/);
+    return QApplicationBinding2::constructor(L, true /*explicitNew*/);
 }
 
 /* ============================================================================================ */
@@ -384,33 +361,27 @@ ObjectUdata* QApplicationBinding::pushObject(lua_State* L, QApplication* objPtr,
 
 /* ============================================================================================ */
 
-QApplicationWrapperBase* QApplicationBinding::createWrappedObject(
-                            int arg1,
-                            char** arg2)
-{
-    return new QApplicationWrapper(
-                            arg1,
-                            arg2);
-}
-
-/* ============================================================================================ */
-
 static const Member members[] =
 {
-    { "children",         Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
-    { "connect",          Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
-    { "event",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QApplication_event },
-    { "exec",             Member::NORMAL_FUNCTION,      (void*) lqtk_QApplication_exec },
-    { "exit",             Member::NORMAL_FUNCTION,      (void*) lqtk_QApplication_exit },
-    { "instance",         Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_instance },
-    { "objectName",       Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
-    { "parent",           Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
-    { "processEvents",    Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_processEvents },
-    { "sendPostedEvents", Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_sendPostedEvents },
-    { "setObjectName",    Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
-    { "setParent",        Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
-    { "topLevelWidgets",  Member::NORMAL_FUNCTION,      (void*) lqtk_QApplication_topLevelWidgets },
-    { NULL,               Member::NONE,                 NULL } /* sentinel */
+    { "applicationDirPath",  Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationDirPath },
+    { "applicationFilePath", Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationFilePath },
+    { "applicationName",     Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationName },
+    { "applicationPid",      Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationPid },
+    { "applicationVersion",  Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationVersion },
+    { "children",            Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
+    { "connect",             Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
+    { "event",               Member::VIRTUAL_FUNCTION,     (void*) lqtk_QApplication_event },
+    { "exec",                Member::NORMAL_FUNCTION,      (void*) lqtk_QApplication_exec },
+    { "exit",                Member::NORMAL_FUNCTION,      (void*) lqtk_QApplication_exit },
+    { "instance",            Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_instance },
+    { "objectName",          Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
+    { "parent",              Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
+    { "processEvents",       Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_processEvents },
+    { "sendPostedEvents",    Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_sendPostedEvents },
+    { "setObjectName",       Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
+    { "setParent",           Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
+    { "topLevelWidgets",     Member::NORMAL_FUNCTION,      (void*) lqtk_QApplication_topLevelWidgets },
+    { NULL,                  Member::NONE,                 NULL } /* sentinel */
 };
 
 /* ============================================================================================ */
@@ -423,14 +394,14 @@ const ClassInfo QApplicationBinding::classInfo =
 
     true,  // isQObject
     false, // needsGuard
-    lqtk_QApplication_constructor,
+    QApplicationBinding2::constructor,
     lqtk_QApplication_new,
     castFunction,
     deleteFunction,
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     setUserValueFunction,
-    13,
+    18,
     members
 };
 

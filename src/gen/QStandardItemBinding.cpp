@@ -158,7 +158,7 @@ extern "C" int lqtk_QStandardItem_model(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QStandardItem::model();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -278,7 +278,6 @@ static bool hasParentFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QStandardItem_new_Args
 {

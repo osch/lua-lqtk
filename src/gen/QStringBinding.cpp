@@ -34,6 +34,7 @@
 #include "QRegularExpressionMatchBinding.hpp"
 #include "QStringBinding.hpp"
 #include "QtBinding.hpp"
+#include "QStringBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -908,9 +909,7 @@ static int lqtk_QString_equals_doLua(lua_State* L)
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             if (!args->arg_1_2.test(L, argOffs+2)) break;
             {
-                args->rslt_1 = 
-                    QStringBinding::delegate_equals(args->arg_1_1.getValue(), args->arg_1_2.getValue());
-                args->rslt_1.push(L);
+                QStringBinding2::delegate_equals(L, argOffs, 2, &args->rslt_1, args->arg_1_1.getValue(), args->arg_1_2.getValue());
                 return 1;
             }
         } while (false); }
@@ -918,9 +917,7 @@ static int lqtk_QString_equals_doLua(lua_State* L)
             if (!args->arg_1_1.test(L, argOffs+1)) break;
             if (!args->arg_2_1.test(L, argOffs+2)) break;
             {
-                args->rslt_1 = 
-                    QStringBinding::delegate_equals(args->arg_1_1.getValue(), args->arg_2_1.getValue());
-                args->rslt_1.push(L);
+                QStringBinding2::delegate_equals(L, argOffs, 2, &args->rslt_1, args->arg_1_1.getValue(), args->arg_2_1.getValue());
                 return 1;
             }
         } while (false); }
@@ -3399,9 +3396,7 @@ static int lqtk_QString_toString_doLua(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 = 
-                    QStringBinding::delegate_toString(args->arg_1_1.getValue());
-                args->rslt_1.push(L);
+                QStringBinding2::delegate_toString(L, argOffs, 1, &args->rslt_1, args->arg_1_1.getValue());
                 return 1;
             }
         } while (false); }
@@ -3608,7 +3603,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QString_new_Args
 {

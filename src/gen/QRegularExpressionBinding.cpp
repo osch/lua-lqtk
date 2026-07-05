@@ -797,7 +797,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QRegularExpression_new_Args
 {
     explicit lqtk_QRegularExpression_new_Args(bool explicitNew)

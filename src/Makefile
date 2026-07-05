@@ -57,7 +57,7 @@ GCC_RUN      :=
 LOPTS        :=
 SO_EXT       :=
 DOC_DIR      := 
-PARSE_QTDDOC := false
+PARSE_QTDOC  := false
 
 ################################################################################
 
@@ -77,7 +77,7 @@ COPTS         := $(or $(COPTS),         $($(PLATFORM)_COPTS))
 LOPTS         := $(or $(LOPTS),         $($(PLATFORM)_LOPTS))
 DOC_DIR       := $(or $(DOC_DIR),       $($(PLATFORM)_DOC_DIR))
        
-ifeq ($(strip $(PARSE_QTDDOC)),true)
+ifeq ($(strip $(PARSE_QTDOC)),true)
 default: parse
 endif
 
@@ -97,6 +97,8 @@ MODULES :=  main.cpp  \
   	    StateGuard.cpp \
   	    Listener.cpp \
   	    moc_Listener.cpp \
+  	    ObjectObserver.cpp \
+  	    moc_ObjectObserver.cpp \
   	    util.cpp \
   	    trace.cpp \
   	    FromLua.cpp \
@@ -116,7 +118,8 @@ MODULES :=  main.cpp  \
   	    QCharBinding2.cpp \
   	    QByteArrayBinding2.cpp \
   	    QRectFBinding2.cpp \
-  	    QTransformBinding2.cpp 
+  	    QTransformBinding2.cpp \
+  	    QAbstractItemViewBinding2.cpp
 
 GEN_MODULES := registryEntries.cpp \
                $(patsubst %,%Binding.cpp,$(BINDINGS))
@@ -150,8 +153,7 @@ include gen/wrappers.mk
 
 build/generated.tmstmp: $(patsubst %,gen/%Binding.hpp,      $(BINDINGS)) \
                         $(patsubst %,gen/%Binding.cpp,      $(BINDINGS)) \
-                        $(patsubst %,gen/%Wrapper.hpp,      $(WRAPPER_BINDINGS)) \
-                        $(filter moc_%.cpp, $(MODULES))
+                        $(patsubst %,gen/%Wrapper.hpp,      $(WRAPPER_BINDINGS))
 	@mkdir -p build
 	@date > $@
 
@@ -161,7 +163,7 @@ test:
                                                
 .PHONY: format
 format:
-	@for i in def/Q*Binding.lua; do echo "formatting $$i"; lua formatBinding.lua $$i - ; done
+	@set -e; for i in def/Q*Binding.lua; do echo "formatting $$i"; lua formatBinding.lua $$i - ; done
                                                
 
 .PHONY: parse

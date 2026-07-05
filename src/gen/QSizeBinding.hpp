@@ -14,13 +14,6 @@ struct QSizeBinding
 {
     typedef QSize QType;
 
-    static bool delegate_equals(
-                    QSize* arg1,
-                    QSize* arg2);
-
-    static QString delegate_toString(
-                    QSize* arg1);
-
     static ObjectUdata* pushObject(lua_State* L, QType* obj, OwnerType ownerType);
 
     static const ClassInfo classInfo;

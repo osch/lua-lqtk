@@ -451,7 +451,7 @@ elements = {
         }
     },
     {
-        flag   = "InputMethodQueries",
+        flag   = "InputMethodQuery",
         values = {
             { "ImEnabled",                cmt = "The widget accepts input method input." },
             { "ImCursorRectangle",        cmt = "The rectangle covering the area of the input cursor in widget coordinates." },

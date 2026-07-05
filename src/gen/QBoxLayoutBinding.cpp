@@ -85,7 +85,7 @@ namespace lqtk
     QBoxLayoutWrapper::~QBoxLayoutWrapper() {
         trace::printf("Deleting lqtk::QBoxLayoutWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QBoxLayout* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QBoxLayout");
@@ -95,41 +95,17 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QBoxLayoutWrapper::addItem1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        addItem1CallArgs* args = (addItem1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "addItem") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L, NOT_OWNER);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 0, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-            }
-        }
-        return 0;
-    }
-
     void QBoxLayoutWrapper::addItem(
                    QLayoutItem* arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            addItem1CallArgs args(
+            QLayoutWrapper::addItem1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, addItem1_doLua, &args, "QBoxLayout", "addItem");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::addItem1_doLua, &args, "QBoxLayout", "addItem");
             }
             if (args.wasCalled) {
                 return;
@@ -140,40 +116,16 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QBoxLayoutWrapper::count1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        count1CallArgs* args = (count1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "count") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 1, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                args->hasValidResult = args->rslt.test(L, -1);
-            }
-        }
-        return 0;
-    }
-
     int QBoxLayoutWrapper::count() const
     {
         lua_State* L = getL();
         if (L) {
-            count1CallArgs args(
+            QLayoutWrapper::count1CallArgs args(
                     const_cast<QBoxLayoutWrapper*>(this)
 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, count1_doLua, &args, "QBoxLayout", "count");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::count1_doLua, &args, "QBoxLayout", "count");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -288,53 +240,24 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QBoxLayoutWrapper::itemAt1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        itemAt1CallArgs* args = (itemAt1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "itemAt") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                if (lua_isnil(L, -1)) {
-                    args->hasValidResult = true;
-                } else {
-                    args->hasValidResult = args->rslt.test(L, -1);
-                }
-            }
-        }
-        return 0;
-    }
-
     QLayoutItem* QBoxLayoutWrapper::itemAt(
                    int arg2) const 
     {
         lua_State* L = getL();
         if (L) {
-            itemAt1CallArgs args(
+            QLayoutWrapper::itemAt1CallArgs args(
                     const_cast<QBoxLayoutWrapper*>(this),
 
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, itemAt1_doLua, &args, "QBoxLayout", "itemAt");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::itemAt1_doLua, &args, "QBoxLayout", "itemAt");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QLayoutItem*?'";
+                    const char* msg = "an object of type 'QLayoutItem'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QBoxLayout", "itemAt", msg);
                 }
             }
@@ -344,45 +267,16 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QBoxLayoutWrapper::sizeHint1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        sizeHint1CallArgs* args = (sizeHint1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "sizeHint") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 1, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                if (args->rsltPtr.test(L, -1)) {
-                    args->rslt = *args->rsltPtr;
-                    args->hasValidResult = true;
-                } else {
-                    args->hasValidResult = false;
-                }
-            }
-        }
-        return 0;
-    }
-
     QSize QBoxLayoutWrapper::sizeHint() const
     {
         lua_State* L = getL();
         if (L) {
-            sizeHint1CallArgs args(
+            QLayoutWrapper::sizeHint1CallArgs args(
                     const_cast<QBoxLayoutWrapper*>(this)
 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, sizeHint1_doLua, &args, "QBoxLayout", "sizeHint");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::sizeHint1_doLua, &args, "QBoxLayout", "sizeHint");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -397,52 +291,23 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QBoxLayoutWrapper::takeAt1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        takeAt1CallArgs* args = (takeAt1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "takeAt") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                if (lua_isnil(L, -1)) {
-                    args->hasValidResult = true;
-                } else {
-                    args->hasValidResult = args->rslt.test(L, -1);
-                }
-            }
-        }
-        return 0;
-    }
-
     QLayoutItem* QBoxLayoutWrapper::takeAt(
                    int arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            takeAt1CallArgs args(
+            QLayoutWrapper::takeAt1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, takeAt1_doLua, &args, "QBoxLayout", "takeAt");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::takeAt1_doLua, &args, "QBoxLayout", "takeAt");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QLayoutItem@?'";
+                    const char* msg = "an object of type 'QLayoutItem'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QBoxLayout", "takeAt", msg);
                 }
             }
@@ -909,7 +774,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QBoxLayout_new_Args
 {

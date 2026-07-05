@@ -23,9 +23,8 @@ private:
 public:
     ~QObjectWrapper();
 
-
-
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct event1CallArgs : BindingUtil::CallArgs {
         event1CallArgs(
@@ -53,13 +52,16 @@ public:
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
     }
 public:
     StateGuard* lqtk_stateGuard;
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

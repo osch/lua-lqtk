@@ -17,7 +17,7 @@ elements = {
     {
         method    = "event",
         binding   = {
-            { "bool", { "QEvent*" }, "protected" },
+            { "bool", { "QEvent*" }, "virtual", "protected" },
         }
     },
     {

@@ -11,6 +11,7 @@
 #include <QRect>
 #include <QSize>
 #include <QWidget>
+#include <Qt>
 
 #include <QPointer>
 #include <stdexcept>
@@ -36,6 +37,7 @@
 #include "QRectBinding.hpp"
 #include "QSizeBinding.hpp"
 #include "QWidgetBinding.hpp"
+#include "QtBinding.hpp"
 #include "QObjectWrapper.hpp"
 #include "QLayoutWrapper.hpp"
 #include "QGridLayoutWrapper.hpp"
@@ -75,7 +77,7 @@ namespace lqtk
     QGridLayoutWrapper::~QGridLayoutWrapper() {
         trace::printf("Deleting lqtk::QGridLayoutWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QGridLayout* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QGridLayout");
@@ -92,41 +94,17 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QGridLayoutWrapper::addItem1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        addItem1CallArgs* args = (addItem1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "addItem") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L, NOT_OWNER);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 0, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-            }
-        }
-        return 0;
-    }
-
     void QGridLayoutWrapper::addItem(
                    QLayoutItem* arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            addItem1CallArgs args(
+            QLayoutWrapper::addItem1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, addItem1_doLua, &args, "QGridLayout", "addItem");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::addItem1_doLua, &args, "QGridLayout", "addItem");
             }
             if (args.wasCalled) {
                 return;
@@ -137,40 +115,16 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QGridLayoutWrapper::count1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        count1CallArgs* args = (count1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "count") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 1, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                args->hasValidResult = args->rslt.test(L, -1);
-            }
-        }
-        return 0;
-    }
-
     int QGridLayoutWrapper::count() const
     {
         lua_State* L = getL();
         if (L) {
-            count1CallArgs args(
+            QLayoutWrapper::count1CallArgs args(
                     const_cast<QGridLayoutWrapper*>(this)
 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, count1_doLua, &args, "QGridLayout", "count");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::count1_doLua, &args, "QGridLayout", "count");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -285,53 +239,24 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QGridLayoutWrapper::itemAt1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        itemAt1CallArgs* args = (itemAt1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "itemAt") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                if (lua_isnil(L, -1)) {
-                    args->hasValidResult = true;
-                } else {
-                    args->hasValidResult = args->rslt.test(L, -1);
-                }
-            }
-        }
-        return 0;
-    }
-
     QLayoutItem* QGridLayoutWrapper::itemAt(
                    int arg2) const 
     {
         lua_State* L = getL();
         if (L) {
-            itemAt1CallArgs args(
+            QLayoutWrapper::itemAt1CallArgs args(
                     const_cast<QGridLayoutWrapper*>(this),
 
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, itemAt1_doLua, &args, "QGridLayout", "itemAt");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::itemAt1_doLua, &args, "QGridLayout", "itemAt");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QLayoutItem*?'";
+                    const char* msg = "an object of type 'QLayoutItem'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QGridLayout", "itemAt", msg);
                 }
             }
@@ -341,45 +266,16 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QGridLayoutWrapper::sizeHint1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        sizeHint1CallArgs* args = (sizeHint1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "sizeHint") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 1, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                if (args->rsltPtr.test(L, -1)) {
-                    args->rslt = *args->rsltPtr;
-                    args->hasValidResult = true;
-                } else {
-                    args->hasValidResult = false;
-                }
-            }
-        }
-        return 0;
-    }
-
     QSize QGridLayoutWrapper::sizeHint() const
     {
         lua_State* L = getL();
         if (L) {
-            sizeHint1CallArgs args(
+            QLayoutWrapper::sizeHint1CallArgs args(
                     const_cast<QGridLayoutWrapper*>(this)
 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, sizeHint1_doLua, &args, "QGridLayout", "sizeHint");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::sizeHint1_doLua, &args, "QGridLayout", "sizeHint");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -394,52 +290,23 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QGridLayoutWrapper::takeAt1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        takeAt1CallArgs* args = (takeAt1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "takeAt") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                if (lua_isnil(L, -1)) {
-                    args->hasValidResult = true;
-                } else {
-                    args->hasValidResult = args->rslt.test(L, -1);
-                }
-            }
-        }
-        return 0;
-    }
-
     QLayoutItem* QGridLayoutWrapper::takeAt(
                    int arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            takeAt1CallArgs args(
+            QLayoutWrapper::takeAt1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, takeAt1_doLua, &args, "QGridLayout", "takeAt");
+                BindingUtil::callLuaMethodImpl(L, QLayoutWrapper::takeAt1_doLua, &args, "QGridLayout", "takeAt");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QLayoutItem@?'";
+                    const char* msg = "an object of type 'QLayoutItem'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QGridLayout", "takeAt", msg);
                 }
             }
@@ -524,7 +391,6 @@ namespace lqtk
 /* ============================================================================================ */
 
 extern "C" {
-    int lqtk_QLayout_addWidget(lua_State* L);
     int lqtk_QLayout_geometry(lua_State* L);
     int lqtk_QLayout_parentWidget(lua_State* L);
     int lqtk_QLayout_setGeometry(lua_State* L);
@@ -566,6 +432,154 @@ extern "C" int lqtk_QGridLayout_addItem(lua_State* L)
             }
         } while (false); }
         return util::argCountError(L, "QGridLayout", "addItem", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QGridLayout_addLayout_Args
+{
+    FromLua<QGridLayout*> arg_1_1;
+    FromLua<QLayout*> arg_2_1;
+    FromLua<int> arg_3_1;
+    FromLua<int> arg_3_2;
+    FromLua<int> arg_3_3;
+    FromLua<int> arg_3_4;
+    FromLua<Qt::Alignment> arg_4_1;
+};
+
+extern "C" int lqtk_QGridLayout_addLayout(lua_State* L)
+{
+    lqtk_QGridLayout_addLayout_Args  argValues;
+    lqtk_QGridLayout_addLayout_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 4) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            args->arg_3_2.check(L, argOffs+4);
+            {
+                    args->arg_1_1.getValue()->QGridLayout::addLayout(args->arg_2_1.getValue(), args->arg_3_1.getValue(), args->arg_3_2.getValue());
+                return 0;
+            }
+        } while (false); }
+        if (nargs == 5) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            args->arg_3_2.check(L, argOffs+4);
+            args->arg_4_1.check(L, argOffs+5);
+            {
+                    args->arg_1_1.getValue()->QGridLayout::addLayout(args->arg_2_1.getValue(), args->arg_3_1.getValue(), args->arg_3_2.getValue(), args->arg_4_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        if (nargs == 6) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            args->arg_3_2.check(L, argOffs+4);
+            args->arg_3_3.check(L, argOffs+5);
+            args->arg_3_4.check(L, argOffs+6);
+            {
+                    args->arg_1_1.getValue()->QGridLayout::addLayout(args->arg_2_1.getValue(), args->arg_3_1.getValue(), args->arg_3_2.getValue(), args->arg_3_3.getValue(), args->arg_3_4.getValue());
+                return 0;
+            }
+        } while (false); }
+        if (nargs == 7) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            args->arg_3_2.check(L, argOffs+4);
+            args->arg_3_3.check(L, argOffs+5);
+            args->arg_3_4.check(L, argOffs+6);
+            args->arg_4_1.check(L, argOffs+7);
+            {
+                    args->arg_1_1.getValue()->QGridLayout::addLayout(args->arg_2_1.getValue(), args->arg_3_1.getValue(), args->arg_3_2.getValue(), args->arg_3_3.getValue(), args->arg_3_4.getValue(), args->arg_4_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QGridLayout", "addLayout", nargs, "4,5,6,7");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QGridLayout_addWidget_Args
+{
+    FromLua<QGridLayout*> arg_1_1;
+    FromLua<QWidget*> arg_2_1;
+    FromLua<int> arg_3_1;
+    FromLua<int> arg_3_2;
+    FromLua<int> arg_3_3;
+    FromLua<int> arg_3_4;
+    FromLua<Qt::Alignment> arg_4_1;
+};
+
+extern "C" int lqtk_QGridLayout_addWidget(lua_State* L)
+{
+    lqtk_QGridLayout_addWidget_Args  argValues;
+    lqtk_QGridLayout_addWidget_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 4) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            args->arg_3_2.check(L, argOffs+4);
+            {
+                    args->arg_1_1.getValue()->QGridLayout::addWidget(args->arg_2_1.getValue(), args->arg_3_1.getValue(), args->arg_3_2.getValue());
+                return 0;
+            }
+        } while (false); }
+        if (nargs == 5) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            args->arg_3_2.check(L, argOffs+4);
+            args->arg_4_1.check(L, argOffs+5);
+            {
+                    args->arg_1_1.getValue()->QGridLayout::addWidget(args->arg_2_1.getValue(), args->arg_3_1.getValue(), args->arg_3_2.getValue(), args->arg_4_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        if (nargs == 6) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            args->arg_3_2.check(L, argOffs+4);
+            args->arg_3_3.check(L, argOffs+5);
+            args->arg_3_4.check(L, argOffs+6);
+            {
+                    args->arg_1_1.getValue()->QGridLayout::addWidget(args->arg_2_1.getValue(), args->arg_3_1.getValue(), args->arg_3_2.getValue(), args->arg_3_3.getValue(), args->arg_3_4.getValue());
+                return 0;
+            }
+        } while (false); }
+        if (nargs == 7) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            args->arg_3_2.check(L, argOffs+4);
+            args->arg_3_3.check(L, argOffs+5);
+            args->arg_3_4.check(L, argOffs+6);
+            args->arg_4_1.check(L, argOffs+7);
+            {
+                    args->arg_1_1.getValue()->QGridLayout::addWidget(args->arg_2_1.getValue(), args->arg_3_1.getValue(), args->arg_3_2.getValue(), args->arg_3_3.getValue(), args->arg_3_4.getValue(), args->arg_4_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QGridLayout", "addWidget", nargs, "4,5,6,7");
     }
     catch (...) {
         return util::handleException(L);
@@ -818,7 +832,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QGridLayout_new_Args
 {
     FromLua<QWidget*> arg_1_1;
@@ -918,7 +931,8 @@ ObjectUdata* QGridLayoutBinding::pushObject(lua_State* L, QGridLayout* objPtr, O
 static const Member members[] =
 {
     { "addItem",           Member::VIRTUAL_FUNCTION,     (void*) lqtk_QGridLayout_addItem },
-    { "addWidget",         Member::NORMAL_FUNCTION,      (void*) lqtk_QLayout_addWidget },
+    { "addLayout",         Member::NORMAL_FUNCTION,      (void*) lqtk_QGridLayout_addLayout },
+    { "addWidget",         Member::NORMAL_FUNCTION,      (void*) lqtk_QGridLayout_addWidget },
     { "children",          Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
     { "connect",           Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
     { "count",             Member::VIRTUAL_FUNCTION,     (void*) lqtk_QGridLayout_count },
@@ -955,7 +969,7 @@ const ClassInfo QGridLayoutBinding::classInfo =
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     setUserValueFunction,
-    18,
+    19,
     members
 };
 

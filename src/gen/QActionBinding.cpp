@@ -82,7 +82,7 @@ namespace lqtk
     QActionWrapper::~QActionWrapper() {
         trace::printf("Deleting lqtk::QActionWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QAction* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QAction");
@@ -99,42 +99,17 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QActionWrapper::event1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        event1CallArgs* args = (event1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "event") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L, NOT_OWNER);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                args->hasValidResult = args->rslt.test(L, -1);
-            }
-        }
-        return 0;
-    }
-
     bool QActionWrapper::event(
                    QEvent* arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            event1CallArgs args(
+            QObjectWrapper::event1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, event1_doLua, &args, "QAction", "event");
+                BindingUtil::callLuaMethodImpl(L, QObjectWrapper::event1_doLua, &args, "QAction", "event");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -318,7 +293,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QAction_new_Args
 {

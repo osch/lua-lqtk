@@ -164,11 +164,11 @@ local function BindingSerializer(binding, checkUniqueness)
     
     ------------------------------------------------------------------------------------------------------------------------
     
-    local funcFlags    = Set("intercept")
+    local funcFlags    = Set("intercept", "assert")
     local funcBnds     = Set("binding", "delegate", "proxy")
     local funcAttr     = Set("func", "method")
     local funcFieldMxl = calcMaxLength(funcFlags, funcBnds, funcAttr)
-    local bndAttrs     = Set("isMethod", "virtual", "override", "protected", "const", "abstract")
+    local bndAttrs     = Set("isMethod", "private", "virtual", "override", "protected", "const", "abstract", "=0")
     
     
     local function outFuncOrMethod(e)
@@ -206,7 +206,7 @@ local function BindingSerializer(binding, checkUniqueness)
                 if #bnd > 2 then
                     for i = 3, #bnd do
                         local a = bnd[i]
-                        assert(bndAttrs[a])
+                        assert(bndAttrs[a], a)
                         assert(bnd[a] == nil or bnd[a] == true)
                         bnd[a] = true
                     end

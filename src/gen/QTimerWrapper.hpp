@@ -30,12 +30,11 @@ private:
     static int lqtk_destruct(lua_State* L);
 public:
     ~QTimerWrapper();
-
-
     void lqtk_QTimer_timerEvent(
                    QTimerEvent* arg1) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct timerEvent1CallArgs : BindingUtil::CallArgs {
         timerEvent1CallArgs(
@@ -54,8 +53,6 @@ public:
 public:
     void timerEvent(
                    QTimerEvent* arg2) override; 
-
-/* -------------------------------------------------------------------------------------------- */
 public:
     bool event(
                    QEvent* arg2) override; 
@@ -65,13 +62,16 @@ public:
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
     }
 public:
     StateGuard* lqtk_stateGuard;
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

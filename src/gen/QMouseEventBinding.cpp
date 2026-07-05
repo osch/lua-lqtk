@@ -132,7 +132,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QMouseEvent_new_Args
 {
     FromLua<QEvent::Type> arg_1_1;

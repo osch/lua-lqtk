@@ -3,13 +3,17 @@
 
 /* ============================================================================================ */
 
+#pragma GCC visibility push (default) 
+
+#include <QByteArray>
 #include <QObject>
 #include <QPointer>
 #include <QByteArray>
+#include <QtCore/qmetatype.h>
+#include <QtCore/qtmochelpers.h>
+#include <memory>
 
-/* ============================================================================================ */
-
-#include "init.h"
+#include "init.h" // sets visibility hidden
 
 /* ============================================================================================ */
 

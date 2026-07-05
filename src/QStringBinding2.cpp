@@ -10,7 +10,10 @@
 #include "util.hpp"
 
 #include "ClassInfo.hpp"
+#include "ObjectUdata.hpp"
+#include "ToLua.hpp"
 #include "QStringBinding.hpp"
+#include "QStringBinding2.hpp"
 #include "FromLua.hpp"
 
 /* ============================================================================================ */
@@ -19,29 +22,38 @@ using namespace lqtk;
 
 /* ============================================================================================ */
 
-bool QStringBinding::delegate_equals(QString* arg1, QString* arg2)
+void QStringBinding2::delegate_equals(lua_State* L, int argOffs, 
+                                                    int nargs, 
+                                                    ToLua<bool>* rslt, QString* arg1, QString* arg2)
 {
     if (arg1 && arg2) {
-        return *arg1 == *arg2;
+        *rslt = (*arg1 == *arg2);
     }
     else {
-        return arg1 == arg2;
+        *rslt = (arg1 == arg2);
     }
+    rslt->push(L);
 }
 
-bool QStringBinding::delegate_equals(QString* arg1, QString arg2)
+void QStringBinding2::delegate_equals(lua_State* L, int argOffs, 
+                                                    int nargs, 
+                                                    ToLua<bool>* rslt, QString* arg1, QString arg2)
 {
     if (arg1) {
-        return *arg1 == arg2;
+        *rslt = (*arg1 == arg2);
     }
     else {
-        return false;
+        *rslt = false;
     }
+    rslt->push(L);
 }
 
-QString QStringBinding::delegate_toString(QString* s)
+void QStringBinding2::delegate_toString(lua_State* L, int argOffs, 
+                                                      int nargs, 
+                                                      ToLua<QString>* rslt, QString* s)
 {
-    return *s;
+    *rslt = *s;
+    rslt->push(L);
 }
 
 extern "C" int lqtk_QString_at(lua_State* L)

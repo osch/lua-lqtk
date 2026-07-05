@@ -53,7 +53,7 @@ extern "C" int lqtk_QGradient_coordinateMode(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QGradient::coordinateMode();
                 args->rslt_1.push(L);
                 return 1;
@@ -180,7 +180,7 @@ extern "C" int lqtk_QGradient_spread(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QGradient::spread();
                 args->rslt_1.push(L);
                 return 1;
@@ -212,7 +212,7 @@ extern "C" int lqtk_QGradient_type(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QGradient::type();
                 args->rslt_1.push(L);
                 return 1;
@@ -250,7 +250,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QGradient_new_Args
 {

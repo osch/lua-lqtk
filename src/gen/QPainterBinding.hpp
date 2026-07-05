@@ -15,21 +15,6 @@ struct QPainterBinding
 {
     typedef QPainterWrapperBase QType;
 
-    static bool delegate_begin(
-                    QPainterWrapperBase* arg1,
-                    QWidget* arg2);
-
-    static bool delegate_begin(
-                    QPainterWrapperBase* arg1,
-                    QPixmapWrapperBase* arg2);
-
-    static void delegate_drawConvexPolygon(
-                    QPainterWrapperBase* arg1,
-                    QList<QPoint> arg2);
-
-    static bool delegate_finish(
-                    QPainterWrapperBase* arg1);
-
 
     static const ClassInfo classInfo;
     

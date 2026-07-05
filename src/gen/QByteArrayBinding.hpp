@@ -14,17 +14,6 @@ struct QByteArrayBinding
 {
     typedef QByteArray QType;
 
-    static QByteArray* delegate_fromBase64Encoding(
-                    QByteArray arg1);
-
-    static QByteArray* delegate_fromBase64Encoding(
-                    QByteArray arg1,
-                    QByteArray::Base64Options arg2);
-
-    static bool delegate_equals(
-                    QByteArray* arg1,
-                    QByteArray* arg2);
-
     static ObjectUdata* pushObject(lua_State* L, QType* obj, OwnerType ownerType);
 
     static const ClassInfo classInfo;

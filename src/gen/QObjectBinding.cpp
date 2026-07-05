@@ -5,9 +5,12 @@
 
 #include <QAbstractItemModel>
 #include <QAction>
+#include <QCompleter>
 #include <QCoreApplication>
 #include <QEvent>
 #include <QEventLoop>
+#include <QIODevice>
+#include <QItemSelectionModel>
 #include <QLayout>
 #include <QObject>
 #include <QString>
@@ -33,9 +36,12 @@
 #include "StateGuard.hpp"
 #include "QAbstractItemModelBinding.hpp"
 #include "QActionBinding.hpp"
+#include "QCompleterBinding.hpp"
 #include "QCoreApplicationBinding.hpp"
 #include "QEventBinding.hpp"
 #include "QEventLoopBinding.hpp"
+#include "QIODeviceBinding.hpp"
+#include "QItemSelectionModelBinding.hpp"
 #include "QLayoutBinding.hpp"
 #include "QObjectBinding.hpp"
 #include "QStringBinding.hpp"
@@ -79,7 +85,7 @@ namespace lqtk
     QObjectWrapper::~QObjectWrapper() {
         trace::printf("Deleting lqtk::QObjectWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QObject* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QObject");
@@ -289,7 +295,7 @@ extern "C" int lqtk_QObject_parent(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QObject::parent();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -417,7 +423,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QObject_new_Args
 {
     FromLua<QObject*> arg_1_1;
@@ -500,29 +505,41 @@ ObjectUdata* QObjectBinding::pushObject(lua_State* L, QObject* objPtr, OwnerType
         if (ptr2) {
             return QActionBinding::pushObject(L, ptr2, ownerType);
         }
-        QCoreApplication* ptr3 = dynamic_cast<QCoreApplication*>(objPtr);
+        QCompleter* ptr3 = dynamic_cast<QCompleter*>(objPtr);
         if (ptr3) {
-            return QCoreApplicationBinding::pushObject(L, ptr3, ownerType);
+            return QCompleterBinding::pushObject(L, ptr3, ownerType);
         }
-        QEventLoop* ptr4 = dynamic_cast<QEventLoop*>(objPtr);
+        QCoreApplication* ptr4 = dynamic_cast<QCoreApplication*>(objPtr);
         if (ptr4) {
-            return QEventLoopBinding::pushObject(L, ptr4, ownerType);
+            return QCoreApplicationBinding::pushObject(L, ptr4, ownerType);
         }
-        QLayout* ptr5 = dynamic_cast<QLayout*>(objPtr);
+        QEventLoop* ptr5 = dynamic_cast<QEventLoop*>(objPtr);
         if (ptr5) {
-            return QLayoutBinding::pushObject(L, ptr5, ownerType);
+            return QEventLoopBinding::pushObject(L, ptr5, ownerType);
         }
-        QThread* ptr6 = dynamic_cast<QThread*>(objPtr);
+        QIODevice* ptr6 = dynamic_cast<QIODevice*>(objPtr);
         if (ptr6) {
-            return QThreadBinding::pushObject(L, ptr6, ownerType);
+            return QIODeviceBinding::pushObject(L, ptr6, ownerType);
         }
-        QTimer* ptr7 = dynamic_cast<QTimer*>(objPtr);
+        QItemSelectionModel* ptr7 = dynamic_cast<QItemSelectionModel*>(objPtr);
         if (ptr7) {
-            return QTimerBinding::pushObject(L, ptr7, ownerType);
+            return QItemSelectionModelBinding::pushObject(L, ptr7, ownerType);
         }
-        QWidget* ptr8 = dynamic_cast<QWidget*>(objPtr);
+        QLayout* ptr8 = dynamic_cast<QLayout*>(objPtr);
         if (ptr8) {
-            return QWidgetBinding::pushObject(L, ptr8, ownerType);
+            return QLayoutBinding::pushObject(L, ptr8, ownerType);
+        }
+        QThread* ptr9 = dynamic_cast<QThread*>(objPtr);
+        if (ptr9) {
+            return QThreadBinding::pushObject(L, ptr9, ownerType);
+        }
+        QTimer* ptr10 = dynamic_cast<QTimer*>(objPtr);
+        if (ptr10) {
+            return QTimerBinding::pushObject(L, ptr10, ownerType);
+        }
+        QWidget* ptr11 = dynamic_cast<QWidget*>(objPtr);
+        if (ptr11) {
+            return QWidgetBinding::pushObject(L, ptr11, ownerType);
         }
     }
     StateGuard::pushWeakUdataRef(L, objPtr);                             // -> udata?

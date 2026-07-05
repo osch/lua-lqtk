@@ -514,7 +514,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QPixmap_new_Args
 {
     explicit lqtk_QPixmap_new_Args(bool explicitNew)

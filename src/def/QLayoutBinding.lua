@@ -39,7 +39,7 @@ elements = {
     {
         method    = "itemAt",
         binding   = {
-            { "QLayoutItem*?", { "int" }, "const", "=0",  },
+            { "QLayoutItem*?", { "int" }, "const", "=0" },
         }
     },
     {

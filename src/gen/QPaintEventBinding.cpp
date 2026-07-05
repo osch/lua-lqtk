@@ -105,7 +105,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QPaintEvent_new_Args
 {
     FromLua<QRect*> arg_1_1;

@@ -68,16 +68,6 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 
 /* ============================================================================================ */
 
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QPointerEvent* ptr = (QPointerEvent*) objectPtr;
-        delete ptr;
-    }
-}
-
-/* ============================================================================================ */
-
 ObjectUdata* QPointerEventBinding::pushObject(lua_State* L, QPointerEvent* objPtr, OwnerType ownerType)
 {
         QSinglePointEvent* ptr1 = dynamic_cast<QSinglePointEvent*>(objPtr);
@@ -283,7 +273,7 @@ const ClassInfo QPointerEventBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction

@@ -60,7 +60,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QColor_new_Args
 {
     explicit lqtk_QColor_new_Args(bool explicitNew)

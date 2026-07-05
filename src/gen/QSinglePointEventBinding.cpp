@@ -10,6 +10,7 @@
 #include <QPointF>
 #include <QPointerEvent>
 #include <QSinglePointEvent>
+#include <QWheelEvent>
 #include <Qt>
 
 #include <QPointer>
@@ -35,6 +36,7 @@
 #include "QPointFBinding.hpp"
 #include "QPointerEventBinding.hpp"
 #include "QSinglePointEventBinding.hpp"
+#include "QWheelEventBinding.hpp"
 #include "QtBinding.hpp"
 
 /* ============================================================================================ */
@@ -135,7 +137,7 @@ extern "C" int lqtk_QSinglePointEvent_exclusivePointGrabber(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QSinglePointEvent::exclusivePointGrabber();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -396,21 +398,15 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 
 /* ============================================================================================ */
 
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QSinglePointEvent* ptr = (QSinglePointEvent*) objectPtr;
-        delete ptr;
-    }
-}
-
-/* ============================================================================================ */
-
 ObjectUdata* QSinglePointEventBinding::pushObject(lua_State* L, QSinglePointEvent* objPtr, OwnerType ownerType)
 {
         QMouseEvent* ptr1 = dynamic_cast<QMouseEvent*>(objPtr);
         if (ptr1) {
             return QMouseEventBinding::pushObject(L, ptr1, ownerType);
+        }
+        QWheelEvent* ptr2 = dynamic_cast<QWheelEvent*>(objPtr);
+        if (ptr2) {
+            return QWheelEventBinding::pushObject(L, ptr2, ownerType);
         }
     StateGuard::pushWeakUdataRef(L, objPtr);                             // -> udata?
     ObjectUdata* udata = ObjectUdata::testArg(L, -1);  
@@ -621,7 +617,7 @@ const ClassInfo QSinglePointEventBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction

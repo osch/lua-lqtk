@@ -1,8 +1,9 @@
 #!/usr/bin/lua
 
-local path     = require("path")     -- https://luarocks.org/modules/xavier-wang/lpath
-local fs       = require("path.fs")  -- https://luarocks.org/modules/xavier-wang/lpath
-local nocurses = pcall(function() return require("nocurses")  end) -- https://luarocks.org/modules/osch/nocurses
+local path         = require("path")     -- https://luarocks.org/modules/xavier-wang/lpath
+local fs           = require("path.fs")  -- https://luarocks.org/modules/xavier-wang/lpath
+
+local hasNocurses, nocurses = pcall(function() return require("nocurses")  end) -- https://luarocks.org/modules/osch/nocurses
 
 os.setlocale("C")
 
@@ -61,7 +62,7 @@ local ok, errmsg = pcall(function()
         end
     end
     print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    if nocurses and nocurses.isatty(io.stdout) then
+    if hasNocurses and nocurses.isatty(io.stdout) then
         nocurses.setfontcolor("GREEN")
         nocurses.setfontbold(true)
     end
@@ -69,17 +70,17 @@ local ok, errmsg = pcall(function()
         print(t..": OK")
     end
     print("**** OK ****")
-    if nocurses and nocurses.isatty(io.stdout) then
+    if hasNocurses and nocurses.isatty(io.stdout) then
         nocurses.resetcolors()
     end
 end)
 if not ok then
-    if nocurses and nocurses.isatty(io.stdout) then
+    if hasNocurses and nocurses.isatty(io.stdout) then
         nocurses.setfontbold(true)
         nocurses.setfontcolor("RED")
     end
     print(errmsg)
-    if nocurses and nocurses.isatty(io.stdout) then
+    if hasNocurses and nocurses.isatty(io.stdout) then
         nocurses.resetcolors()
     end
 end

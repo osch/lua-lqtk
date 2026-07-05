@@ -23,11 +23,9 @@ private:
     static int lqtk_destruct(lua_State* L);
 public:
     ~QWidgetItemWrapper();
-
     ObjectGuard* lqtk_getObjectGuard() const {
         return ObjectGuard::Holder<QWidgetItem>::lqtk_getObjectGuard();
     }
-
 
 /* -------------------------------------------------------------------------------------------- */
 
@@ -39,6 +37,7 @@ public:
     }
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct hasHeightForWidth1CallArgs : BindingUtil::CallArgs {
         hasHeightForWidth1CallArgs(
@@ -58,6 +57,7 @@ public:
     bool hasHeightForWidth() const override;
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct heightForWidth1CallArgs : BindingUtil::CallArgs {
         heightForWidth1CallArgs(
@@ -81,6 +81,7 @@ public:
                    int arg2) const override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct widget1CallArgs : BindingUtil::CallArgs {
         widget1CallArgs(
@@ -104,13 +105,16 @@ public:
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
     }
 public:
     StateGuard* lqtk_stateGuard;
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

@@ -68,7 +68,7 @@ namespace lqtk
     QTimerWrapper::~QTimerWrapper() {
         trace::printf("Deleting lqtk::QTimerWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QTimer* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QTimer");
@@ -516,7 +516,7 @@ extern "C" int lqtk_QTimer_timerType(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QTimer::timerType();
                 args->rslt_1.push(L);
                 return 1;
@@ -573,7 +573,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QTimer_new_Args
 {

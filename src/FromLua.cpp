@@ -99,6 +99,23 @@ void FromLua<QString>::check(lua_State* L, int arg)
     }
 }
 
+bool FromLua<const char*>::test(lua_State* L, int arg) 
+{
+    int tp = lua_type(L, arg);
+    if (tp == LUA_TSTRING) {
+         value = lua_tostring(L, arg);
+         return true;
+    }
+    return false;
+}
+
+void FromLua<const char*>::check(lua_State* L, int arg) 
+{
+    if (!test(L, arg)) {
+        util::checkType(L, arg, LUA_TSTRING);
+    }
+}
+
 FromLua<QByteArray*>::~FromLua() 
 {
     if (hasNew) {

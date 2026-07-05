@@ -67,16 +67,6 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 
 /* ============================================================================================ */
 
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QInputEvent* ptr = (QInputEvent*) objectPtr;
-        delete ptr;
-    }
-}
-
-/* ============================================================================================ */
-
 ObjectUdata* QInputEventBinding::pushObject(lua_State* L, QInputEvent* objPtr, OwnerType ownerType)
 {
         QContextMenuEvent* ptr1 = dynamic_cast<QContextMenuEvent*>(objPtr);
@@ -290,7 +280,7 @@ const ClassInfo QInputEventBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction

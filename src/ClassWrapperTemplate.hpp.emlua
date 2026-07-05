@@ -8,26 +8,23 @@
 
 namespace lqtk
 {
-@ assert(needsWrapperClass)
 @ local cb = ")"
 @ if hasProtectedMethods(BINDING) then
 
 class @(BINDING)ExportWrapper
 {
 public:
-@   for _, member in ipairs(virtualMembers) do
-@    if member.fromClass == BINDING then
+@   for _, member in ipairs(members) do
+@    if member.fromClass == BINDING and member.binding then
 @     for _, bnd in ipairs(member.binding) do
-@       if bnd.virtual then
+@       if not bnd.abstract and bnd.protected then
 @         local rslt = bnd[1]
 @         local args = bnd[2]
 @         local argOffs = bnd.isFunc and 0 or 1
-@         if not bnd.abstract and bnd.protected then
     virtual @(toCType(rslt)) lqtk_@(BINDING)_@(member.name)(@(#args == argOffs and cb.." = 0;" or "")
-@           for i = argOffs + 1, #args do
-@             local a = args[i]
+@         for i = argOffs + 1, #args do
+@           local a = args[i]
                    @(toCType(a)) arg@(i)@(i < #args and "," or cb.." = 0;") 
-@           end
 @         end
 @       end
 @     end
@@ -36,9 +33,9 @@ public:
 };
 @ end
 
-class @(wrapperClass) : public @(wrapperBase)
+class @(wrapperClass)@(constructor and " : public "..wrapperBase or "")
 @ for _, b in ipairs(baseClasses) do
-@   if hasProtectedMethods(b) then
+@   if constructor and hasProtectedMethods(b) then
                       , public @(b)ExportWrapper
 @   end
 @ end
@@ -46,40 +43,40 @@ class @(wrapperClass) : public @(wrapperBase)
                       , public ObjectGuard::Holder<@(className)>
 @ end
 {
-public:
 @ local cnstr = constructor and constructor.binding or constructorProxy
 @ if cnstr then
+public:
 
 /* -------------------------------------------------------------------------------------------- */
 
-@ for _, bnd in ipairs(cnstr) do
-@   local args = bnd[2]
+@   for _, bnd in ipairs(cnstr) do
+@     local args = bnd[2]
     @(wrapperClass)(@(#args == 0 and cb..";" or "")
-@   for i, a in ipairs(args) do
-@       if isPtrType(a) and isOnlyWrapped(getPtrElementType(a)) then
+@     for i, a in ipairs(args) do
+@         if isPtrType(a) and isOnlyWrapped(getPtrElementType(a)) then
                    @(getPtrElementType(a))WrapperBase* arg@(i)@(i < #args and "," or cb..";") 
-@       else
+@         else
                    @(toCType(a)) arg@(i)@(i < #args and "," or cb..";") 
-@       end
+@         end
+@     end
 @   end
 @ end
-@ end
+@ if hasVirtualMembers and constructor then
 
 /* -------------------------------------------------------------------------------------------- */
 
-@ if hasVirtualMembers then
 private:
     static int lqtk_destruct(lua_State* L);
 public:
 @ end
+@ if constructor then
     ~@(wrapperClass)();
-
+@ end
 @ if thisDef.needsGuard then
     ObjectGuard* lqtk_getObjectGuard() const {
         return ObjectGuard::Holder<@(className)>::lqtk_getObjectGuard();
     }
 @ end
-
 @ if needsValidityCheck then
 
 /* -------------------------------------------------------------------------------------------- */
@@ -91,19 +88,21 @@ public:
         }
     }
 @ end    
-@ for _, bname in ipairs(baseClasses) do
-@   if needsWrapper(bname) then
-@     local b = getBinding(bname)
-@     for _, member in ipairs(b.elements) do
-@       if member.method and member.binding then
-@         for _, bnd in ipairs(member.binding) do
-@           if not bnd.abstract and bnd.protected then
-@             local rslt = bnd[1]
-@             local args = bnd[2]
+@ if constructor then
+@   for _, bname in ipairs(baseClasses) do
+@     if needsWrapper(bname) then
+@       local b = getBinding(bname)
+@       for _, member in ipairs(b.elements) do
+@         if member.method and member.binding then
+@           for _, bnd in ipairs(member.binding) do
+@             if not bnd.abstract and bnd.protected then
+@               local rslt = bnd[1]
+@               local args = bnd[2]
     @(toCType(rslt)) lqtk_@(b.class)_@(member.method)(@(#args == 0 and cb.." override;" or "")
-@             for i = 1, #args do
-@               local a = args[i]
+@               for i = 1, #args do
+@                 local a = args[i]
                    @(toCType(a)) arg@(i)@(i < #args and "," or cb.." override;") 
+@               end
 @             end
 @           end
 @         end
@@ -116,13 +115,14 @@ public:
 @     local virtualCount = 0
 @     for _, bnd in ipairs(member.binding) do
 @       if bnd.virtual then
-
-/* -------------------------------------------------------------------------------------------- */
 @         virtualCount = virtualCount + 1
 @         local rslt = bnd[1]
 @         local args = bnd[2]
 @         local argOffs = bnd.isFunc and 0 or 1
-@         if not member.fromBase then
+@         if getVirtualMethodTopBaseClass(BINDING, member.name) == BINDING then
+
+/* -------------------------------------------------------------------------------------------- */
+
 public:
     struct @(member.name)@(virtualCount)CallArgs : BindingUtil::CallArgs {
         @(member.name)@(virtualCount)CallArgs(
@@ -155,7 +155,9 @@ public:
         ToLua<@(className)*> arg1;
 @          for a = argOffs + 1, #args do
 @            local argType = args[a]
-@            if isClass(argType) then
+@            if argType == "QString" then
+        ToLua<@(toCType(argType))> arg@(a);
+@            elseif isClass(argType) then
         ToLua<@(toCType(argType))*> arg@(a);
 @            else
         ToLua<@(toCType(argType))> arg@(a);
@@ -165,26 +167,28 @@ public:
     
     static int @(member.name)@(virtualCount)_doLua(lua_State* L);
 @         end
+@         if constructor then
 public:
-@       local closeDecl = bnd.const and cb.." const override;" 
-@                                    or cb.." override;"
+@           local closeDecl = bnd.const and cb.." const override;" 
+@                                        or cb.." override;"
     @(toCType(rslt)) @(member.name)(@(#args == argOffs and closeDecl or "")
-@       for a = argOffs + 1, #args do
-@           local argType = args[a]
+@           for a = argOffs + 1, #args do
+@             local argType = args[a]
                    @(toCTypeForOverride(argType)) arg@(a)@(a < #args and "," or closeDecl) 
+@           end
+@         end
 @       end
-@      end
 @     end
 @   end
 @ end
-@ if hasVirtualMembers then
+@ if hasVirtualMembers and constructor then
 
 /* -------------------------------------------------------------------------------------------- */
 
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
@@ -192,6 +196,9 @@ private:
 public:
     StateGuard* lqtk_stateGuard;
 @ end
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

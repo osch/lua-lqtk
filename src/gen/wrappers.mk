@@ -1,14 +1,24 @@
 WRAPPER_BINDINGS := QAbstractButton \
+                    QAbstractItemModel \
+                    QAbstractItemView \
                     QAbstractScrollArea \
+                    QAbstractTableModel \
                     QAction \
                     QApplication \
                     QBoxLayout \
+                    QComboBox \
+                    QCompleter \
                     QDialog \
                     QDialogButtonBox \
                     QEventLoop \
+                    QFile \
+                    QFileDevice \
                     QFrame \
                     QGridLayout \
                     QHBoxLayout \
+                    QHeaderView \
+                    QIODevice \
+                    QItemSelectionModel \
                     QLabel \
                     QLayout \
                     QLineEdit \
@@ -19,6 +29,7 @@ WRAPPER_BINDINGS := QAbstractButton \
                     QOpenGLWidget \
                     QPainter \
                     QPixmap \
+                    QProgressBar \
                     QPushButton \
                     QStandardItem \
                     QStandardItemModel \
@@ -27,5 +38,6 @@ WRAPPER_BINDINGS := QAbstractButton \
                     QTimer \
                     QTreeView \
                     QVBoxLayout \
+                    QWheelEvent \
                     QWidget \
                     QWidgetItem

@@ -14,8 +14,6 @@ struct QWidgetBinding
 {
     typedef QWidget QType;
 
-    static void intercept_new();
-
     static ObjectUdata* pushObject(lua_State* L, QType* obj, OwnerType ownerType);
 
     static const ClassInfo classInfo;

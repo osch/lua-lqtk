@@ -76,7 +76,7 @@ namespace lqtk
     QLayoutWrapper::~QLayoutWrapper() {
         trace::printf("Deleting lqtk::QLayoutWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QLayout* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QLayout");
@@ -277,7 +277,7 @@ namespace lqtk
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QLayoutItem*?'";
+                    const char* msg = "an object of type 'QLayoutItem'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QLayout", "itemAt", msg);
                 }
             }
@@ -429,7 +429,7 @@ namespace lqtk
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QLayoutItem@?'";
+                    const char* msg = "an object of type 'QLayoutItem'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QLayout", "takeAt", msg);
                 }
             }
@@ -559,7 +559,7 @@ extern "C" int lqtk_QLayout_parentWidget(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QLayout::parentWidget();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -647,7 +647,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QLayout_new_Args
 {

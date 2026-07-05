@@ -94,7 +94,6 @@ static void deleteFunction(void* objectPtr)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QPalette_new_Args
 {
     FromLua<Qt::GlobalColor> arg_1_1;

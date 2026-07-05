@@ -27,6 +27,7 @@
 #include "ToLua.hpp"
 #include "registry.hpp"
 #include "StateGuard.hpp"
+#include "ObjectObserver.hpp"
 #include "QAbstractItemModelBinding.hpp"
 #include "QEventBinding.hpp"
 #include "QModelIndexBinding.hpp"
@@ -35,6 +36,7 @@
 #include "QStandardItemModelBinding.hpp"
 #include "QVariantBinding.hpp"
 #include "QObjectWrapper.hpp"
+#include "QAbstractItemModelWrapper.hpp"
 #include "QStandardItemModelWrapper.hpp"
 
 /* ============================================================================================ */
@@ -90,7 +92,7 @@ namespace lqtk
     QStandardItemModelWrapper::~QStandardItemModelWrapper() {
         trace::printf("Deleting lqtk::QStandardItemModelWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QStandardItemModel* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QStandardItemModel");
@@ -99,52 +101,68 @@ namespace lqtk
         }
     }
 
-/* -------------------------------------------------------------------------------------------- */
-    
-    int QStandardItemModelWrapper::data1_doLua(lua_State* L) 
+    QModelIndex QStandardItemModelWrapper::lqtk_QAbstractItemModel_createIndex(
+                   int arg1, 
+                   int arg2) 
     {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        data1CallArgs* args = (data1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "data") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                args->arg1.push(L, NOT_OWNER);
-                args->arg2.push(L, IS_OWNER);
-                args->arg3.push(L);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 3, 1, ehIndex);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
+        return QAbstractItemModel::createIndex(
+                   arg1, 
+                   arg2); 
+    }
+
+    QModelIndex QStandardItemModelWrapper::lqtk_QAbstractItemModel_createIndex(
+                   int arg1, 
+                   int arg2, 
+                   int arg3) 
+    {
+        return QAbstractItemModel::createIndex(
+                   arg1, 
+                   arg2, 
+                   arg3); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    int QStandardItemModelWrapper::columnCount(
+                   const QModelIndex& arg2) const 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QAbstractItemModelWrapper::columnCount1CallArgs args(
+                    const_cast<QStandardItemModelWrapper*>(this),
+
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QAbstractItemModelWrapper::columnCount1_doLua, &args, "QStandardItemModel", "columnCount");
+            }
+            if (args.wasCalled) {
+                if (args.hasValidResult) {
+                    return args.rslt;
                 } else {
-                    return lua_error(L);
-                }
-                if (args->rsltPtr.test(L, -1)) {
-                    args->rslt = *args->rsltPtr;
-                    args->hasValidResult = true;
-                } else {
-                    args->hasValidResult = false;
+                    const char* msg = "an integer";
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "QStandardItemModel", "columnCount", msg);
                 }
             }
         }
-        return 0;
+        return QStandardItemModel::columnCount(
+                    arg2); 
     }
 
+/* -------------------------------------------------------------------------------------------- */
     QVariant QStandardItemModelWrapper::data(
                    const QModelIndex& arg2, 
                    int arg3) const 
     {
         lua_State* L = getL();
         if (L) {
-            data1CallArgs args(
+            QAbstractItemModelWrapper::data1CallArgs args(
                     const_cast<QStandardItemModelWrapper*>(this),
 
                     arg2, 
                     arg3 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, data1_doLua, &args, "QStandardItemModel", "data");
+                BindingUtil::callLuaMethodImpl(L, QAbstractItemModelWrapper::data1_doLua, &args, "QStandardItemModel", "data");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -158,6 +176,93 @@ namespace lqtk
         return QStandardItemModel::data(
                     arg2, 
                     arg3); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    QModelIndex QStandardItemModelWrapper::index(
+                   int arg2, 
+                   int arg3, 
+                   const QModelIndex& arg4) const 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QAbstractItemModelWrapper::index1CallArgs args(
+                    const_cast<QStandardItemModelWrapper*>(this),
+
+                    arg2, 
+                    arg3, 
+                    arg4 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QAbstractItemModelWrapper::index1_doLua, &args, "QStandardItemModel", "index");
+            }
+            if (args.wasCalled) {
+                if (args.hasValidResult) {
+                    return args.rslt;
+                } else {
+                    const char* msg = "an object of type 'QModelIndex'";
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "QStandardItemModel", "index", msg);
+                }
+            }
+        }
+        return QStandardItemModel::index(
+                    arg2, 
+                    arg3, 
+                    arg4); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    QModelIndex QStandardItemModelWrapper::parent(
+                   const QModelIndex& arg2) const 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QAbstractItemModelWrapper::parent1CallArgs args(
+                    const_cast<QStandardItemModelWrapper*>(this),
+
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QAbstractItemModelWrapper::parent1_doLua, &args, "QStandardItemModel", "parent");
+            }
+            if (args.wasCalled) {
+                if (args.hasValidResult) {
+                    return args.rslt;
+                } else {
+                    const char* msg = "an object of type 'QModelIndex'";
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "QStandardItemModel", "parent", msg);
+                }
+            }
+        }
+        return QStandardItemModel::parent(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    int QStandardItemModelWrapper::rowCount(
+                   const QModelIndex& arg2) const 
+    {
+        lua_State* L = getL();
+        if (L) {
+            QAbstractItemModelWrapper::rowCount1CallArgs args(
+                    const_cast<QStandardItemModelWrapper*>(this),
+
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, QAbstractItemModelWrapper::rowCount1_doLua, &args, "QStandardItemModel", "rowCount");
+            }
+            if (args.wasCalled) {
+                if (args.hasValidResult) {
+                    return args.rslt;
+                } else {
+                    const char* msg = "an integer";
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "QStandardItemModel", "rowCount", msg);
+                }
+            }
+        }
+        return QStandardItemModel::rowCount(
+                    arg2); 
     }
 
 /* -------------------------------------------------------------------------------------------- */
@@ -191,11 +296,11 @@ namespace lqtk
 /* ============================================================================================ */
 
 extern "C" {
+    int lqtk_QAbstractItemModel_createIndex(lua_State* L);
     int lqtk_QObject_children(lua_State* L);
     int lqtk_QObject_connect(lua_State* L);
     int lqtk_QObject_event(lua_State* L);
     int lqtk_QObject_objectName(lua_State* L);
-    int lqtk_QObject_parent(lua_State* L);
     int lqtk_QObject_setObjectName(lua_State* L);
     int lqtk_QObject_setParent(lua_State* L);
 }
@@ -245,6 +350,49 @@ extern "C" int lqtk_QStandardItemModel_appendRow(lua_State* L)
 /* ============================================================================================ */
 
 
+struct lqtk_QStandardItemModel_columnCount_Args
+{
+    FromLua<QStandardItemModel*> arg_1_1;
+    FromLua<QModelIndex*> arg_2_1;
+    ToLua<int> rslt_1;
+};
+
+extern "C" int lqtk_QStandardItemModel_columnCount(lua_State* L)
+{
+    lqtk_QStandardItemModel_columnCount_Args  argValues;
+    lqtk_QStandardItemModel_columnCount_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::columnCount();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::columnCount(*args->arg_2_1.getValue());
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QStandardItemModel", "columnCount", nargs, "1,2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
 struct lqtk_QStandardItemModel_data_Args
 {
     FromLua<QStandardItemModel*> arg_1_1;
@@ -260,6 +408,16 @@ extern "C" int lqtk_QStandardItemModel_data(lua_State* L)
     try {
         int argOffs = 0;
         int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::data(*args->arg_2_1.getValue());
+                args->rslt_1.push(L, IS_OWNER);
+                return 1;
+            }
+        } while (false); }
         if (nargs == 3) { do {
             args->arg_1_1.check(L, argOffs+1);
             args->arg_2_1.check(L, argOffs+2);
@@ -271,7 +429,60 @@ extern "C" int lqtk_QStandardItemModel_data(lua_State* L)
                 return 1;
             }
         } while (false); }
-        return util::argCountError(L, "QStandardItemModel", "data", nargs, "3");
+        return util::argCountError(L, "QStandardItemModel", "data", nargs, "2,3");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QStandardItemModel_index_Args
+{
+    FromLua<QStandardItemModel*> arg_1_1;
+    FromLua<int> arg_2_1;
+    FromLua<int> arg_2_2;
+    FromLua<QModelIndex*> arg_3_1;
+    ToLua<QModelIndex*> rslt_1;
+};
+
+extern "C" int lqtk_QStandardItemModel_index(lua_State* L)
+{
+    lqtk_QStandardItemModel_index_Args  argValues;
+    lqtk_QStandardItemModel_index_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 3) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_2_2.check(L, argOffs+3);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::index(args->arg_2_1.getValue(), args->arg_2_2.getValue());
+                args->rslt_1.push(L, IS_OWNER);
+                ObjectObserver* observer = ObjectObserver::assureObserver(L, args->arg_1_1.getValue());
+                observer->startGuarding(L, -1);
+                return 1;
+            }
+        } while (false); }
+        if (nargs == 4) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_2_2.check(L, argOffs+3);
+            args->arg_3_1.check(L, argOffs+4);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::index(args->arg_2_1.getValue(), args->arg_2_2.getValue(), *args->arg_3_1.getValue());
+                args->rslt_1.push(L, IS_OWNER);
+                ObjectObserver* observer = ObjectObserver::assureObserver(L, args->arg_1_1.getValue());
+                observer->startGuarding(L, -1);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QStandardItemModel", "index", nargs, "3,4");
     }
     catch (...) {
         return util::handleException(L);
@@ -308,6 +519,95 @@ extern "C" int lqtk_QStandardItemModel_item(lua_State* L)
             }
         } while (false); }
         return util::argCountError(L, "QStandardItemModel", "item", nargs, "3");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QStandardItemModel_parent_Args
+{
+    FromLua<QStandardItemModel*> arg_1_1;
+    FromLua<QModelIndex*> arg_2_1;
+    ToLua<QObject*> rslt_1;
+    ToLua<QModelIndex*> rslt_2;
+};
+
+extern "C" int lqtk_QStandardItemModel_parent(lua_State* L)
+{
+    lqtk_QStandardItemModel_parent_Args  argValues;
+    lqtk_QStandardItemModel_parent_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::parent();
+                args->rslt_1.push(L, NOT_OWNER);
+                return 1;
+            }
+        } while (false); }
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                args->rslt_2 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::parent(*args->arg_2_1.getValue());
+                args->rslt_2.push(L, IS_OWNER);
+                ObjectObserver* observer = ObjectObserver::assureObserver(L, args->arg_1_1.getValue());
+                observer->startGuarding(L, -1);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QStandardItemModel", "parent", nargs, "1,2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QStandardItemModel_rowCount_Args
+{
+    FromLua<QStandardItemModel*> arg_1_1;
+    FromLua<QModelIndex*> arg_2_1;
+    ToLua<int> rslt_1;
+};
+
+extern "C" int lqtk_QStandardItemModel_rowCount(lua_State* L)
+{
+    lqtk_QStandardItemModel_rowCount_Args  argValues;
+    lqtk_QStandardItemModel_rowCount_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::rowCount();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QStandardItemModel::rowCount(*args->arg_2_1.getValue());
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QStandardItemModel", "rowCount", nargs, "1,2");
     }
     catch (...) {
         return util::handleException(L);
@@ -403,7 +703,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QStandardItemModel_new_Args
 {
@@ -532,14 +831,21 @@ ObjectUdata* QStandardItemModelBinding::pushObject(lua_State* L, QStandardItemMo
 
 static const Member members[] =
 {
+    { "HorizontalSortHint",        Member::INTEGER,              (void*) QStandardItemModel::HorizontalSortHint },
+    { "NoLayoutChangeHint",        Member::INTEGER,              (void*) QStandardItemModel::NoLayoutChangeHint },
+    { "VerticalSortHint",          Member::INTEGER,              (void*) QStandardItemModel::VerticalSortHint },
     { "appendRow",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QStandardItemModel_appendRow },
     { "children",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
+    { "columnCount",               Member::VIRTUAL_FUNCTION,     (void*) lqtk_QStandardItemModel_columnCount },
     { "connect",                   Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
+    { "createIndex",               Member::NORMAL_FUNCTION,      (void*) lqtk_QAbstractItemModel_createIndex },
     { "data",                      Member::VIRTUAL_FUNCTION,     (void*) lqtk_QStandardItemModel_data },
     { "event",                     Member::VIRTUAL_FUNCTION,     (void*) lqtk_QObject_event },
+    { "index",                     Member::VIRTUAL_FUNCTION,     (void*) lqtk_QStandardItemModel_index },
     { "item",                      Member::NORMAL_FUNCTION,      (void*) lqtk_QStandardItemModel_item },
     { "objectName",                Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
-    { "parent",                    Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
+    { "parent",                    Member::VIRTUAL_FUNCTION,     (void*) lqtk_QStandardItemModel_parent },
+    { "rowCount",                  Member::VIRTUAL_FUNCTION,     (void*) lqtk_QStandardItemModel_rowCount },
     { "setHorizontalHeaderLabels", Member::NORMAL_FUNCTION,      (void*) lqtk_QStandardItemModel_setHorizontalHeaderLabels },
     { "setObjectName",             Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
     { "setParent",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
@@ -563,7 +869,7 @@ const ClassInfo QStandardItemModelBinding::classInfo =
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     setUserValueFunction,
-    11,
+    18,
     members
 };
 

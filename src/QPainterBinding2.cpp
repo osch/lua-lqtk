@@ -13,10 +13,13 @@
 
 #include "ClassInfo.hpp"
 #include "ObjectGuard.hpp"
+#include "ObjectUdata.hpp"
 #include "QPixmapWrapper.hpp"
 #include "QPixmapWrapperBase.hpp"
 #include "QPainterWrapperBase.hpp"
+#include "ToLua.hpp"
 #include "QPainterBinding.hpp"
+#include "QPainterBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -24,25 +27,34 @@ using namespace lqtk;
 
 /* ============================================================================================ */
 
-bool QPainterBinding::delegate_begin(QPainterWrapperBase* painter, QWidget* widget)
+void QPainterBinding2::delegate_begin(lua_State* L, int argOffs, 
+                                                    int nargs, 
+                                                    ToLua<bool>* rslt, QPainterWrapperBase* painter, QWidget* widget)
 {
-    return painter->lqtk_begin(widget);
+    *rslt = painter->lqtk_begin(widget);
+    rslt->push(L);
 }
 
-bool QPainterBinding::delegate_begin(QPainterWrapperBase* painter, QPixmapWrapperBase* widget)
+void QPainterBinding2::delegate_begin(lua_State* L, int argOffs, 
+                                                    int nargs, 
+                                                    ToLua<bool>* rslt, QPainterWrapperBase* painter, QPixmapWrapperBase* widget)
 {
-    return painter->lqtk_begin(widget);
+    *rslt = painter->lqtk_begin(widget);
+    rslt->push(L);
 }
 
-bool QPainterBinding::delegate_finish(QPainterWrapperBase* painter)
+void QPainterBinding2::delegate_finish(lua_State* L, int argOffs, 
+                                                     int nargs, 
+                                                     ToLua<bool>* rslt, QPainterWrapperBase* painter)
 {
-    return painter->end();
+    *rslt = painter->end();
+    rslt->push(L);
 }
 
-void QPainterBinding::delegate_drawConvexPolygon(QPainterWrapperBase* painter,
-                                                 QList<QPoint>        list)
+void QPainterBinding2::delegate_drawConvexPolygon(lua_State* L, int argOffs, 
+                                                                int nargs, 
+                                                                QPainterWrapperBase* painter,
+                                                                QList<QPoint>        list)
 {
     painter->drawConvexPolygon(list.data(), list.count());
 }
-
-

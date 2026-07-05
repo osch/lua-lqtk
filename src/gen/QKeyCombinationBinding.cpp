@@ -83,7 +83,7 @@ extern "C" int lqtk_QKeyCombination_key(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QKeyCombination::key();
                 args->rslt_1.push(L);
                 return 1;
@@ -185,7 +185,6 @@ static void deleteFunction(void* objectPtr)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QKeyCombination_new_Args
 {

@@ -32,91 +32,95 @@ StateGuard::~StateGuard()
     }
 }
 
-
-static int Lqtk_GuardDestruct(lua_State* L)
+class StateGuard::Impl
 {
-    StateGuard** udata = (StateGuard**) util::checkUdata(L, 1, LQTK_GUARD_TYPE_NAME);
-    trace::printf("Lqtk_GuardDestruct %p\n", *udata);
-    StateGuard* guard = *udata;
-    if (guard) {
-        guard->L = nullptr;
-        if (guard->stateRef != LUA_NOREF) {
-            luaL_unref(L, LUA_REGISTRYINDEX, guard->stateRef);
-            guard->stateRef = LUA_NOREF;
-        }
+public:
 
-        lua_pushnil(L);                                                 // -> nil
-        lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_WEAK_RECEIVER_MAP_NAME); // -> 
-
-        lua_pushnil(L);                                                 // -> nil
-        lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_EPHEMERON_TABLE_NAME);   // -> 
-        
-        lua_pushnil(L);                                                       // -> nil
-        lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_WEAK_UDATA_MAP_NAME);          // -> 
-
-        lua_pushnil(L);                                                       // -> nil
-        lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_WEAK_USER_VALUE_MAP_NAME);     // -> 
-        
-        lua_pushnil(L);                                                       // -> nil
-        lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_STRONG_USER_VALUE_MAP_NAME);   // -> 
-        
-        StateGuard::releaseRef(udata, StateGuard::FOR_LUA_STATE);
-        if (guard->qapp && guard->getRefCount() == 1)
-        {
-            QApplication* qapp = guard->qapp;
-            guard->qapp = nullptr;
-            delete qapp;
-        }
-    }
-    return 0;
-}
-
-/* ============================================================================================ */
-
-static int pushMap(lua_State* L, const char* name, const char* mode = nullptr)
-{
-    if (lua_rawgetp(L, LUA_REGISTRYINDEX, name) != LUA_TTABLE)       // -> map?
+    static int destruct(lua_State* L)
     {
-        lua_pop(L, 1);                                               // -> 
-        lua_newtable(L);                                             // -> map
-        if (mode) {
-            lua_newtable(L);                                         // -> map, mapMeta
-            lua_pushstring(L, mode);                                 // -> map, mapMeta, mode
-            lua_setfield(L, -2, "__mode");                           // -> map, mapMeta
-            lua_setmetatable(L, -2);                                 // -> map
+        StateGuard** udata = (StateGuard**) util::checkUdata(L, 1, LQTK_GUARD_TYPE_NAME);
+        trace::printf("Lqtk_GuardDestruct %p\n", *udata);
+        StateGuard* guard = *udata;
+        if (guard) {
+            guard->L = nullptr;
+            if (guard->stateRef != LUA_NOREF) {
+                luaL_unref(L, LUA_REGISTRYINDEX, guard->stateRef);
+                guard->stateRef = LUA_NOREF;
+            }
+    
+            lua_pushnil(L);                                                 // -> nil
+            lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_WEAK_RECEIVER_MAP_NAME); // -> 
+    
+            lua_pushnil(L);                                                 // -> nil
+            lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_EPHEMERON_TABLE_NAME);   // -> 
+            
+            lua_pushnil(L);                                                       // -> nil
+            lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_WEAK_UDATA_MAP_NAME);          // -> 
+    
+            lua_pushnil(L);                                                       // -> nil
+            lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_WEAK_USER_VALUE_MAP_NAME);     // -> 
+            
+            lua_pushnil(L);                                                       // -> nil
+            lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_STRONG_USER_VALUE_MAP_NAME);   // -> 
+            
+            StateGuard::releaseRef(udata, StateGuard::FOR_LUA_STATE);
+            if (guard->qapp)
+            {
+                trace::printf("StateGuard: deleting QCoreApplication\n");
+                QCoreApplication* qapp = guard->qapp;
+                guard->qapp = nullptr;
+                delete qapp;
+            }
         }
-        lua_pushvalue(L, -1);                                        // -> map, map
-        lua_rawsetp(L, LUA_REGISTRYINDEX, name);                     // -> map
+        return 0;
     }
-    return 1;
-}
-
+    
+    /* ============================================================================================ */
+    
+    static int pushMap(lua_State* L, const char* name, const char* mode = nullptr)
+    {
+        if (lua_rawgetp(L, LUA_REGISTRYINDEX, name) != LUA_TTABLE)       // -> map?
+        {
+            lua_pop(L, 1);                                               // -> 
+            lua_newtable(L);                                             // -> map
+            if (mode) {
+                lua_newtable(L);                                         // -> map, mapMeta
+                lua_pushstring(L, mode);                                 // -> map, mapMeta, mode
+                lua_setfield(L, -2, "__mode");                           // -> map, mapMeta
+                lua_setmetatable(L, -2);                                 // -> map
+            }
+            lua_pushvalue(L, -1);                                        // -> map, map
+            lua_rawsetp(L, LUA_REGISTRYINDEX, name);                     // -> map
+        }
+        return 1;
+    }
+};
 
 /* ============================================================================================ */
 
 int StateGuard::pushEphemeronRefMap(lua_State* L)
 {
-    return pushMap(L, LQTK_EPHEMERON_TABLE_NAME, "k");
+    return Impl::pushMap(L, LQTK_EPHEMERON_TABLE_NAME, "k");
 }
 
 int StateGuard::pushWeakReceiverRefMap(lua_State* L)
 {
-    return pushMap(L, LQTK_WEAK_RECEIVER_MAP_NAME, "v");
+    return Impl::pushMap(L, LQTK_WEAK_RECEIVER_MAP_NAME, "v");
 }
 
 int StateGuard::pushWeakUdataRefMap(lua_State* L)
 {
-    return pushMap(L, LQTK_WEAK_UDATA_MAP_NAME, "v");
+    return Impl::pushMap(L, LQTK_WEAK_UDATA_MAP_NAME, "v");
 }
 
 int StateGuard::pushWeakUserValueMap(lua_State* L)
 {
-    return pushMap(L, LQTK_WEAK_USER_VALUE_MAP_NAME, "v");
+    return Impl::pushMap(L, LQTK_WEAK_USER_VALUE_MAP_NAME, "v");
 }
 
 int StateGuard::pushStrongUserValueMap(lua_State* L)
 {
-    return pushMap(L, NULL, LQTK_STRONG_USER_VALUE_MAP_NAME);
+    return Impl::pushMap(L, NULL, LQTK_STRONG_USER_VALUE_MAP_NAME);
 }
 
 /* ============================================================================================ */
@@ -320,7 +324,7 @@ StateGuard* StateGuard::push(lua_State* L)
         lua_pushvalue(L, -1); // -> guard, guard
         lua_rawsetp(L, LUA_REGISTRYINDEX, LQTK_GUARD_TYPE_NAME); // -> guard
         luaL_newmetatable(L, LQTK_GUARD_TYPE_NAME);   // -> guard, meta
-        lua_pushcfunction(L, Lqtk_GuardDestruct); // -> guard, meta, destr
+        lua_pushcfunction(L, Impl::destruct); // -> guard, meta, destr
         lua_setfield(L, -2, "__gc"); // -> guard, meta
         lua_setmetatable(L, -2); // -> guard
     

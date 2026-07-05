@@ -6,6 +6,7 @@
 #include <QAbstractButton>
 #include <QAction>
 #include <QCloseEvent>
+#include <QComboBox>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QEvent>
@@ -22,12 +23,14 @@
 #include <QPaintEvent>
 #include <QPalette>
 #include <QPoint>
+#include <QProgressBar>
 #include <QRect>
 #include <QResizeEvent>
 #include <QSize>
 #include <QSizePolicy>
 #include <QString>
 #include <QTabWidget>
+#include <QVariant>
 #include <QWidget>
 #include <Qt>
 
@@ -50,6 +53,7 @@
 #include "QAbstractButtonBinding.hpp"
 #include "QActionBinding.hpp"
 #include "QCloseEventBinding.hpp"
+#include "QComboBoxBinding.hpp"
 #include "QDialogBinding.hpp"
 #include "QDialogButtonBoxBinding.hpp"
 #include "QEventBinding.hpp"
@@ -66,16 +70,19 @@
 #include "QPaintEventBinding.hpp"
 #include "QPaletteBinding.hpp"
 #include "QPointBinding.hpp"
+#include "QProgressBarBinding.hpp"
 #include "QRectBinding.hpp"
 #include "QResizeEventBinding.hpp"
 #include "QSizeBinding.hpp"
 #include "QSizePolicyBinding.hpp"
 #include "QStringBinding.hpp"
 #include "QTabWidgetBinding.hpp"
+#include "QVariantBinding.hpp"
 #include "QWidgetBinding.hpp"
 #include "QtBinding.hpp"
 #include "QObjectWrapper.hpp"
 #include "QWidgetWrapper.hpp"
+#include "QWidgetBinding2.hpp"
 
 /* ============================================================================================ */
 
@@ -120,7 +127,7 @@ namespace lqtk
     QWidgetWrapper::~QWidgetWrapper() {
         trace::printf("Deleting lqtk::QWidgetWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QWidget* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QWidget");
@@ -236,47 +243,17 @@ namespace lqtk
     }
 
 /* -------------------------------------------------------------------------------------------- */
-    
-    int QWidgetWrapper::event1_doLua(lua_State* L) 
-    {
-        luaL_checkstack(L, LUA_MINSTACK, nullptr);
-        event1CallArgs* args = (event1CallArgs*)lua_touserdata(L, 1);
-        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
-            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
-            int ehIndex = lua_gettop(L);
-            if (lua_getfield(L, -2, "event") != LUA_TNIL) {        // -> uval, eh, member?
-                args->wasImplFound = true;
-                int memberIdx = lua_gettop(L);
-                ObjectUdata* temp2 = args->arg2.push(L, NOT_OWNER);
-                int tempIdx2 = lua_gettop(L);
-                lua_pushvalue(L, memberIdx);
-                args->arg1.push(L, NOT_OWNER);
-                lua_pushvalue(L, tempIdx2);
-                args->wasCalled = true;
-                int rc = lua_pcall(L, 2, 1, ehIndex);
-                temp2->invalidate(L, tempIdx2);
-                if (rc == LUA_OK) {
-                    args->callReturned = true;
-                } else {
-                    return lua_error(L);
-                }
-                args->hasValidResult = args->rslt.test(L, -1);
-            }
-        }
-        return 0;
-    }
-
     bool QWidgetWrapper::event(
                    QEvent* arg2) 
     {
         lua_State* L = getL();
         if (L) {
-            event1CallArgs args(
+            QObjectWrapper::event1CallArgs args(
                     this,
                     arg2 
             );
             {
-                BindingUtil::callLuaMethodImpl(L, event1_doLua, &args, "QWidget", "event");
+                BindingUtil::callLuaMethodImpl(L, QObjectWrapper::event1_doLua, &args, "QWidget", "event");
             }
             if (args.wasCalled) {
                 if (args.hasValidResult) {
@@ -388,6 +365,63 @@ namespace lqtk
             }
         }
         return QWidget::heightForWidth(
+                    arg2); 
+    }
+
+/* -------------------------------------------------------------------------------------------- */
+    
+    int QWidgetWrapper::inputMethodQuery1_doLua(lua_State* L) 
+    {
+        luaL_checkstack(L, LUA_MINSTACK, nullptr);
+        inputMethodQuery1CallArgs* args = (inputMethodQuery1CallArgs*)lua_touserdata(L, 1);
+        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
+            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
+            int ehIndex = lua_gettop(L);
+            if (lua_getfield(L, -2, "inputMethodQuery") != LUA_TNIL) {        // -> uval, eh, member?
+                args->wasImplFound = true;
+                args->arg1.push(L, NOT_OWNER);
+                args->arg2.push(L);
+                args->wasCalled = true;
+                int rc = lua_pcall(L, 2, 1, ehIndex);
+                if (rc == LUA_OK) {
+                    args->callReturned = true;
+                } else {
+                    return lua_error(L);
+                }
+                if (args->rsltPtr.test(L, -1)) {
+                    args->rslt = *args->rsltPtr;
+                    args->hasValidResult = true;
+                } else {
+                    args->hasValidResult = false;
+                }
+            }
+        }
+        return 0;
+    }
+
+    QVariant QWidgetWrapper::inputMethodQuery(
+                   Qt::InputMethodQuery arg2) const 
+    {
+        lua_State* L = getL();
+        if (L) {
+            inputMethodQuery1CallArgs args(
+                    const_cast<QWidgetWrapper*>(this),
+
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, inputMethodQuery1_doLua, &args, "QWidget", "inputMethodQuery");
+            }
+            if (args.wasCalled) {
+                if (args.hasValidResult) {
+                    return args.rslt;
+                } else {
+                    const char* msg = "an object of type 'QVariant'";
+                    BindingUtil::throwMethodImplRsltError(L, args.arg1, "QWidget", "inputMethodQuery", msg);
+                }
+            }
+        }
+        return QWidget::inputMethodQuery(
                     arg2); 
     }
 
@@ -691,6 +725,51 @@ namespace lqtk
                     arg2); 
     }
 
+/* -------------------------------------------------------------------------------------------- */
+    
+    int QWidgetWrapper::setVisible1_doLua(lua_State* L) 
+    {
+        luaL_checkstack(L, LUA_MINSTACK, nullptr);
+        setVisible1CallArgs* args = (setVisible1CallArgs*)lua_touserdata(L, 1);
+        if (StateGuard::pushWeakUserValue(L, args->arg1) == LUA_TTABLE) {   // -> uval?
+            lua_pushcfunction(L, util::handleError);                        // -> uval, eh
+            int ehIndex = lua_gettop(L);
+            if (lua_getfield(L, -2, "setVisible") != LUA_TNIL) {        // -> uval, eh, member?
+                args->wasImplFound = true;
+                args->arg1.push(L, NOT_OWNER);
+                args->arg2.push(L);
+                args->wasCalled = true;
+                int rc = lua_pcall(L, 2, 0, ehIndex);
+                if (rc == LUA_OK) {
+                    args->callReturned = true;
+                } else {
+                    return lua_error(L);
+                }
+            }
+        }
+        return 0;
+    }
+
+    void QWidgetWrapper::setVisible(
+                   bool arg2) 
+    {
+        lua_State* L = getL();
+        if (L) {
+            setVisible1CallArgs args(
+                    this,
+                    arg2 
+            );
+            {
+                BindingUtil::callLuaMethodImpl(L, setVisible1_doLua, &args, "QWidget", "setVisible");
+            }
+            if (args.wasCalled) {
+                return;
+            }
+        }
+        return QWidget::setVisible(
+                    arg2); 
+    }
+
 } // namespace lqtk
 
 /* ============================================================================================ */
@@ -721,7 +800,7 @@ extern "C" int lqtk_QWidget_keyboardGrabber(lua_State* L)
         int nargs = lua_gettop(L);
         if (nargs == 0) { do {
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QWidget::keyboardGrabber();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -751,7 +830,7 @@ extern "C" int lqtk_QWidget_mouseGrabber(lua_State* L)
         int nargs = lua_gettop(L);
         if (nargs == 0) { do {
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     QWidget::mouseGrabber();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -1297,6 +1376,40 @@ extern "C" int lqtk_QWidget_hide(lua_State* L)
 /* ============================================================================================ */
 
 
+struct lqtk_QWidget_inputMethodQuery_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<Qt::InputMethodQuery> arg_2_1;
+    ToLua<QVariant*> rslt_1;
+};
+
+extern "C" int lqtk_QWidget_inputMethodQuery(lua_State* L)
+{
+    lqtk_QWidget_inputMethodQuery_Args  argValues;
+    lqtk_QWidget_inputMethodQuery_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QWidget::inputMethodQuery(args->arg_2_1.getValue());
+                args->rslt_1.push(L, IS_OWNER);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "inputMethodQuery", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
 struct lqtk_QWidget_mouseDoubleClickEvent_Args
 {
     FromLua<QWidget*> arg_1_1;
@@ -1562,7 +1675,7 @@ extern "C" int lqtk_QWidget_parentWidget(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QWidget::parentWidget();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -1810,6 +1923,339 @@ extern "C" int lqtk_QWidget_setSizePolicy(lua_State* L)
 /* ============================================================================================ */
 
 
+struct lqtk_QWidget_setStyleSheet_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<QString> arg_2_1;
+};
+
+static int lqtk_QWidget_setStyleSheet_doLua(lua_State* L)
+{
+    lqtk_QWidget_setStyleSheet_Args* args = (lqtk_QWidget_setStyleSheet_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setStyleSheet(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setStyleSheet", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QWidget_setStyleSheet(lua_State* L)
+{
+    try {
+        lqtk_QWidget_setStyleSheet_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QWidget_setStyleSheet_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_setToolTip_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<QString> arg_2_1;
+};
+
+static int lqtk_QWidget_setToolTip_doLua(lua_State* L)
+{
+    lqtk_QWidget_setToolTip_Args* args = (lqtk_QWidget_setToolTip_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setToolTip(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setToolTip", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QWidget_setToolTip(lua_State* L)
+{
+    try {
+        lqtk_QWidget_setToolTip_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QWidget_setToolTip_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_setToolTipDuration_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<int> arg_2_1;
+};
+
+extern "C" int lqtk_QWidget_setToolTipDuration(lua_State* L)
+{
+    lqtk_QWidget_setToolTipDuration_Args  argValues;
+    lqtk_QWidget_setToolTipDuration_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setToolTipDuration(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setToolTipDuration", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_setUpdatesEnabled_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<bool> arg_2_1;
+};
+
+extern "C" int lqtk_QWidget_setUpdatesEnabled(lua_State* L)
+{
+    lqtk_QWidget_setUpdatesEnabled_Args  argValues;
+    lqtk_QWidget_setUpdatesEnabled_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setUpdatesEnabled(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setUpdatesEnabled", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_setVisible_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<bool> arg_2_1;
+};
+
+extern "C" int lqtk_QWidget_setVisible(lua_State* L)
+{
+    lqtk_QWidget_setVisible_Args  argValues;
+    lqtk_QWidget_setVisible_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setVisible(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setVisible", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_setWhatsThis_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<QString> arg_2_1;
+};
+
+static int lqtk_QWidget_setWhatsThis_doLua(lua_State* L)
+{
+    lqtk_QWidget_setWhatsThis_Args* args = (lqtk_QWidget_setWhatsThis_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setWhatsThis(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setWhatsThis", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QWidget_setWhatsThis(lua_State* L)
+{
+    try {
+        lqtk_QWidget_setWhatsThis_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QWidget_setWhatsThis_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_setWindowFilePath_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<QString> arg_2_1;
+};
+
+static int lqtk_QWidget_setWindowFilePath_doLua(lua_State* L)
+{
+    lqtk_QWidget_setWindowFilePath_Args* args = (lqtk_QWidget_setWindowFilePath_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setWindowFilePath(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setWindowFilePath", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QWidget_setWindowFilePath(lua_State* L)
+{
+    try {
+        lqtk_QWidget_setWindowFilePath_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QWidget_setWindowFilePath_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_setWindowFlag_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<Qt::WindowType> arg_2_1;
+    FromLua<bool> arg_3_1;
+};
+
+extern "C" int lqtk_QWidget_setWindowFlag(lua_State* L)
+{
+    lqtk_QWidget_setWindowFlag_Args  argValues;
+    lqtk_QWidget_setWindowFlag_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setWindowFlag(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        if (nargs == 3) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            args->arg_3_1.check(L, argOffs+3);
+            {
+                    args->arg_1_1.getValue()->QWidget::setWindowFlag(args->arg_2_1.getValue(), args->arg_3_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setWindowFlag", nargs, "2,3");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_setWindowFlags_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    FromLua<Qt::WindowFlags> arg_2_1;
+};
+
+extern "C" int lqtk_QWidget_setWindowFlags(lua_State* L)
+{
+    lqtk_QWidget_setWindowFlags_Args  argValues;
+    lqtk_QWidget_setWindowFlags_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 2) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            args->arg_2_1.check(L, argOffs+2);
+            {
+                    args->arg_1_1.getValue()->QWidget::setWindowFlags(args->arg_2_1.getValue());
+                return 0;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "setWindowFlags", nargs, "2");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
 struct lqtk_QWidget_setWindowTitle_Args
 {
     FromLua<QWidget*> arg_1_1;
@@ -2037,6 +2483,177 @@ extern "C" int lqtk_QWidget_width(lua_State* L)
 
 /* ============================================================================================ */
 
+
+struct lqtk_QWidget_windowFlags_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    ToLua<Qt::WindowFlags> rslt_1;
+};
+
+extern "C" int lqtk_QWidget_windowFlags(lua_State* L)
+{
+    lqtk_QWidget_windowFlags_Args  argValues;
+    lqtk_QWidget_windowFlags_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QWidget::windowFlags();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "windowFlags", nargs, "1");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_windowModality_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    ToLua<Qt::WindowModality> rslt_1;
+};
+
+extern "C" int lqtk_QWidget_windowModality(lua_State* L)
+{
+    lqtk_QWidget_windowModality_Args  argValues;
+    lqtk_QWidget_windowModality_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QWidget::windowModality();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "windowModality", nargs, "1");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_windowOpacity_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    ToLua<double> rslt_1;
+};
+
+extern "C" int lqtk_QWidget_windowOpacity(lua_State* L)
+{
+    lqtk_QWidget_windowOpacity_Args  argValues;
+    lqtk_QWidget_windowOpacity_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QWidget::windowOpacity();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "windowOpacity", nargs, "1");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_windowRole_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    ToLua<QString> rslt_1;
+};
+
+static int lqtk_QWidget_windowRole_doLua(lua_State* L)
+{
+    lqtk_QWidget_windowRole_Args* args = (lqtk_QWidget_windowRole_Args*) lua_touserdata(L, 1);
+    lua_remove(L, 1);
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QWidget::windowRole();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "windowRole", nargs, "1");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+extern "C" int lqtk_QWidget_windowRole(lua_State* L)
+{
+    try {
+        lqtk_QWidget_windowRole_Args args;
+        return BindingUtil::callMethodFromLua(L, lqtk_QWidget_windowRole_doLua, &args);
+    }    
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
+
+struct lqtk_QWidget_windowState_Args
+{
+    FromLua<QWidget*> arg_1_1;
+    ToLua<Qt::WindowStates> rslt_1;
+};
+
+extern "C" int lqtk_QWidget_windowState(lua_State* L)
+{
+    lqtk_QWidget_windowState_Args  argValues;
+    lqtk_QWidget_windowState_Args* args = &argValues;
+    try {
+        int argOffs = 0;
+        int nargs = lua_gettop(L);
+        if (nargs == 1) { do {
+            args->arg_1_1.check(L, argOffs+1);
+            {
+                args->rslt_1 = 
+                    args->arg_1_1.getValue()->QWidget::windowState();
+                args->rslt_1.push(L);
+                return 1;
+            }
+        } while (false); }
+        return util::argCountError(L, "QWidget", "windowState", nargs, "1");
+    }
+    catch (...) {
+        return util::handleException(L);
+    }
+}
+
+/* ============================================================================================ */
+
 static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
 {
     if (objectPtr)
@@ -2080,7 +2697,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 
 /* ============================================================================================ */
 
-
 struct lqtk_QWidget_new_Args
 {
     FromLua<QWidget*> arg_1_1;
@@ -2110,7 +2726,7 @@ extern "C" int lqtk_QWidget_constructor(lua_State* L, bool explicitNew)
             lua_remove(L, 1);
         }
 
-        QWidgetBinding::intercept_new();
+        QWidgetBinding2::assert_new();
 
         if (nargs == 0) { do {
             {
@@ -2180,41 +2796,49 @@ ObjectUdata* QWidgetBinding::pushObject(lua_State* L, QWidget* objPtr, OwnerType
         if (ptr1) {
             return QAbstractButtonBinding::pushObject(L, ptr1, ownerType);
         }
-        QDialog* ptr2 = dynamic_cast<QDialog*>(objPtr);
+        QComboBox* ptr2 = dynamic_cast<QComboBox*>(objPtr);
         if (ptr2) {
-            return QDialogBinding::pushObject(L, ptr2, ownerType);
+            return QComboBoxBinding::pushObject(L, ptr2, ownerType);
         }
-        QDialogButtonBox* ptr3 = dynamic_cast<QDialogButtonBox*>(objPtr);
+        QDialog* ptr3 = dynamic_cast<QDialog*>(objPtr);
         if (ptr3) {
-            return QDialogButtonBoxBinding::pushObject(L, ptr3, ownerType);
+            return QDialogBinding::pushObject(L, ptr3, ownerType);
         }
-        QFrame* ptr4 = dynamic_cast<QFrame*>(objPtr);
+        QDialogButtonBox* ptr4 = dynamic_cast<QDialogButtonBox*>(objPtr);
         if (ptr4) {
-            return QFrameBinding::pushObject(L, ptr4, ownerType);
+            return QDialogButtonBoxBinding::pushObject(L, ptr4, ownerType);
         }
-        QLineEdit* ptr5 = dynamic_cast<QLineEdit*>(objPtr);
+        QFrame* ptr5 = dynamic_cast<QFrame*>(objPtr);
         if (ptr5) {
-            return QLineEditBinding::pushObject(L, ptr5, ownerType);
+            return QFrameBinding::pushObject(L, ptr5, ownerType);
         }
-        QMainWindow* ptr6 = dynamic_cast<QMainWindow*>(objPtr);
+        QLineEdit* ptr6 = dynamic_cast<QLineEdit*>(objPtr);
         if (ptr6) {
-            return QMainWindowBinding::pushObject(L, ptr6, ownerType);
+            return QLineEditBinding::pushObject(L, ptr6, ownerType);
         }
-        QMenu* ptr7 = dynamic_cast<QMenu*>(objPtr);
+        QMainWindow* ptr7 = dynamic_cast<QMainWindow*>(objPtr);
         if (ptr7) {
-            return QMenuBinding::pushObject(L, ptr7, ownerType);
+            return QMainWindowBinding::pushObject(L, ptr7, ownerType);
         }
-        QMenuBar* ptr8 = dynamic_cast<QMenuBar*>(objPtr);
+        QMenu* ptr8 = dynamic_cast<QMenu*>(objPtr);
         if (ptr8) {
-            return QMenuBarBinding::pushObject(L, ptr8, ownerType);
+            return QMenuBinding::pushObject(L, ptr8, ownerType);
         }
-        QOpenGLWidget* ptr9 = dynamic_cast<QOpenGLWidget*>(objPtr);
+        QMenuBar* ptr9 = dynamic_cast<QMenuBar*>(objPtr);
         if (ptr9) {
-            return QOpenGLWidgetBinding::pushObject(L, ptr9, ownerType);
+            return QMenuBarBinding::pushObject(L, ptr9, ownerType);
         }
-        QTabWidget* ptr10 = dynamic_cast<QTabWidget*>(objPtr);
+        QOpenGLWidget* ptr10 = dynamic_cast<QOpenGLWidget*>(objPtr);
         if (ptr10) {
-            return QTabWidgetBinding::pushObject(L, ptr10, ownerType);
+            return QOpenGLWidgetBinding::pushObject(L, ptr10, ownerType);
+        }
+        QProgressBar* ptr11 = dynamic_cast<QProgressBar*>(objPtr);
+        if (ptr11) {
+            return QProgressBarBinding::pushObject(L, ptr11, ownerType);
+        }
+        QTabWidget* ptr12 = dynamic_cast<QTabWidget*>(objPtr);
+        if (ptr12) {
+            return QTabWidgetBinding::pushObject(L, ptr12, ownerType);
         }
     }
     StateGuard::pushWeakUdataRef(L, objPtr);                             // -> udata?
@@ -2258,6 +2882,7 @@ static const Member members[] =
     { "height",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_height },
     { "heightForWidth",        Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_heightForWidth },
     { "hide",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_hide },
+    { "inputMethodQuery",      Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_inputMethodQuery },
     { "keyboardGrabber",       Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_keyboardGrabber },
     { "mouseDoubleClickEvent", Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_mouseDoubleClickEvent },
     { "mouseGrabber",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_mouseGrabber },
@@ -2279,7 +2904,16 @@ static const Member members[] =
     { "setObjectName",         Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
     { "setParent",             Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
     { "setSizePolicy",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setSizePolicy },
+    { "setStyleSheet",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setStyleSheet },
     { "setTabOrder",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setTabOrder },
+    { "setToolTip",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setToolTip },
+    { "setToolTipDuration",    Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setToolTipDuration },
+    { "setUpdatesEnabled",     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setUpdatesEnabled },
+    { "setVisible",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QWidget_setVisible },
+    { "setWhatsThis",          Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWhatsThis },
+    { "setWindowFilePath",     Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFilePath },
+    { "setWindowFlag",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFlag },
+    { "setWindowFlags",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowFlags },
     { "setWindowTitle",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_setWindowTitle },
     { "show",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_show },
     { "size",                  Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_size },
@@ -2287,6 +2921,11 @@ static const Member members[] =
     { "sizePolicy",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_sizePolicy },
     { "update",                Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_update },
     { "width",                 Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_width },
+    { "windowFlags",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowFlags },
+    { "windowModality",        Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowModality },
+    { "windowOpacity",         Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowOpacity },
+    { "windowRole",            Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowRole },
+    { "windowState",           Member::NORMAL_FUNCTION,      (void*) lqtk_QWidget_windowState },
     { NULL,                    Member::NONE,                 NULL } /* sentinel */
 };
 
@@ -2307,7 +2946,7 @@ const ClassInfo QWidgetBinding::classInfo =
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     setUserValueFunction,
-    45,
+    60,
     members
 };
 

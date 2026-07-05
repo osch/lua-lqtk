@@ -47,8 +47,6 @@ private:
     static int lqtk_destruct(lua_State* L);
 public:
     ~QWidgetWrapper();
-
-
     void lqtk_QWidget_closeEvent(
                    QCloseEvent* arg1) override; 
     bool lqtk_QWidget_event(
@@ -67,6 +65,7 @@ public:
                    QResizeEvent* arg1) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct closeEvent1CallArgs : BindingUtil::CallArgs {
         closeEvent1CallArgs(
@@ -85,31 +84,12 @@ public:
 public:
     void closeEvent(
                    QCloseEvent* arg2) override; 
-
-/* -------------------------------------------------------------------------------------------- */
-public:
-    struct event1CallArgs : BindingUtil::CallArgs {
-        event1CallArgs(
-                QWidget* thiz,
-                    QEvent* arg2) 
-              : BindingUtil::CallArgs(thiz),
-                hasValidResult(false),
-                arg1(thiz),
-                arg2(arg2) 
-        {}
-
-        bool hasValidResult;
-        FromLua<bool> rslt;
-        ToLua<QWidget*> arg1;
-        ToLua<QEvent*> arg2;
-    };
-    
-    static int event1_doLua(lua_State* L);
 public:
     bool event(
                    QEvent* arg2) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct hasHeightForWidth1CallArgs : BindingUtil::CallArgs {
         hasHeightForWidth1CallArgs(
@@ -129,6 +109,7 @@ public:
     bool hasHeightForWidth() const override;
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct heightForWidth1CallArgs : BindingUtil::CallArgs {
         heightForWidth1CallArgs(
@@ -152,6 +133,32 @@ public:
                    int arg2) const override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
+public:
+    struct inputMethodQuery1CallArgs : BindingUtil::CallArgs {
+        inputMethodQuery1CallArgs(
+                QWidget* thiz,
+                    Qt::InputMethodQuery arg2) 
+              : BindingUtil::CallArgs(thiz),
+                hasValidResult(false),
+                arg1(thiz),
+                arg2(arg2) 
+        {}
+
+        bool hasValidResult;
+        FromLua<QVariant*> rsltPtr;
+        QVariant rslt;
+        ToLua<QWidget*> arg1;
+        ToLua<Qt::InputMethodQuery> arg2;
+    };
+    
+    static int inputMethodQuery1_doLua(lua_State* L);
+public:
+    QVariant inputMethodQuery(
+                   Qt::InputMethodQuery arg2) const override; 
+
+/* -------------------------------------------------------------------------------------------- */
+
 public:
     struct mouseDoubleClickEvent1CallArgs : BindingUtil::CallArgs {
         mouseDoubleClickEvent1CallArgs(
@@ -172,6 +179,7 @@ public:
                    QMouseEvent* arg2) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct mouseMoveEvent1CallArgs : BindingUtil::CallArgs {
         mouseMoveEvent1CallArgs(
@@ -192,6 +200,7 @@ public:
                    QMouseEvent* arg2) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct mousePressEvent1CallArgs : BindingUtil::CallArgs {
         mousePressEvent1CallArgs(
@@ -212,6 +221,7 @@ public:
                    QMouseEvent* arg2) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct mouseReleaseEvent1CallArgs : BindingUtil::CallArgs {
         mouseReleaseEvent1CallArgs(
@@ -232,6 +242,7 @@ public:
                    QMouseEvent* arg2) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct paintEvent1CallArgs : BindingUtil::CallArgs {
         paintEvent1CallArgs(
@@ -252,6 +263,7 @@ public:
                    QPaintEvent* arg2) override; 
 
 /* -------------------------------------------------------------------------------------------- */
+
 public:
     struct resizeEvent1CallArgs : BindingUtil::CallArgs {
         resizeEvent1CallArgs(
@@ -273,16 +285,40 @@ public:
 
 /* -------------------------------------------------------------------------------------------- */
 
+public:
+    struct setVisible1CallArgs : BindingUtil::CallArgs {
+        setVisible1CallArgs(
+                QWidget* thiz,
+                    bool arg2) 
+              : BindingUtil::CallArgs(thiz),
+                arg1(thiz),
+                arg2(arg2) 
+        {}
+
+        ToLua<QWidget*> arg1;
+        ToLua<bool> arg2;
+    };
+    
+    static int setVisible1_doLua(lua_State* L);
+public:
+    void setVisible(
+                   bool arg2) override; 
+
+/* -------------------------------------------------------------------------------------------- */
+
 private:
     lua_State* getL() const {
         if (lqtk_stateGuard) {
-            return lqtk_stateGuard->L;
+            return lqtk_stateGuard->getL();
         } else {
             return nullptr;
         }
     }
 public:
     StateGuard* lqtk_stateGuard;
+
+/* -------------------------------------------------------------------------------------------- */
+
 };
 
 } // namespace lqtk

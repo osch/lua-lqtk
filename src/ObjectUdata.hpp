@@ -81,6 +81,8 @@ public:
         
     State getState(const char** errmsg = nullptr);
     
+    void handleInvalidation(lua_State* L, int udataIdx);
+    
     static ObjectUdata* testArg(lua_State* L, int arg, States states = VALID);
     static ObjectUdata* checkArg(lua_State* L, int arg, States states = VALID);
 

@@ -37,6 +37,11 @@ using namespace lqtk;
 /* ============================================================================================ */
 
 extern "C" {
+    int lqtk_QCoreApplication_applicationDirPath(lua_State* L);
+    int lqtk_QCoreApplication_applicationFilePath(lua_State* L);
+    int lqtk_QCoreApplication_applicationName(lua_State* L);
+    int lqtk_QCoreApplication_applicationPid(lua_State* L);
+    int lqtk_QCoreApplication_applicationVersion(lua_State* L);
     int lqtk_QCoreApplication_instance(lua_State* L);
     int lqtk_QCoreApplication_processEvents(lua_State* L);
     int lqtk_QCoreApplication_sendPostedEvents(lua_State* L);
@@ -67,16 +72,6 @@ static void* castFunction(const ClassInfo* targetClassInfo, void* objectPtr)
         }
     }
     return NULL;
-}
-
-/* ============================================================================================ */
-
-static void deleteFunction(void* objectPtr)
-{
-    if (objectPtr) {
-        QGuiApplication* ptr = (QGuiApplication*) objectPtr;
-        delete ptr;
-    }
 }
 
 /* ============================================================================================ */
@@ -112,17 +107,22 @@ ObjectUdata* QGuiApplicationBinding::pushObject(lua_State* L, QGuiApplication* o
 
 static const Member members[] =
 {
-    { "children",         Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
-    { "connect",          Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
-    { "event",            Member::VIRTUAL_FUNCTION,     (void*) lqtk_QObject_event },
-    { "instance",         Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_instance },
-    { "objectName",       Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
-    { "parent",           Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
-    { "processEvents",    Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_processEvents },
-    { "sendPostedEvents", Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_sendPostedEvents },
-    { "setObjectName",    Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
-    { "setParent",        Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
-    { NULL,               Member::NONE,                 NULL } /* sentinel */
+    { "applicationDirPath",  Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationDirPath },
+    { "applicationFilePath", Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationFilePath },
+    { "applicationName",     Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationName },
+    { "applicationPid",      Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationPid },
+    { "applicationVersion",  Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_applicationVersion },
+    { "children",            Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_children },
+    { "connect",             Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_connect },
+    { "event",               Member::VIRTUAL_FUNCTION,     (void*) lqtk_QObject_event },
+    { "instance",            Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_instance },
+    { "objectName",          Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_objectName },
+    { "parent",              Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_parent },
+    { "processEvents",       Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_processEvents },
+    { "sendPostedEvents",    Member::NORMAL_FUNCTION,      (void*) lqtk_QCoreApplication_sendPostedEvents },
+    { "setObjectName",       Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setObjectName },
+    { "setParent",           Member::NORMAL_FUNCTION,      (void*) lqtk_QObject_setParent },
+    { NULL,                  Member::NONE,                 NULL } /* sentinel */
 };
 
 /* ============================================================================================ */
@@ -138,11 +138,11 @@ const ClassInfo QGuiApplicationBinding::classInfo =
     NULL, // constructFunc
     NULL, // newFunc
     castFunction,
-    deleteFunction,
+    NULL, // deleteFunction
     NULL, // hasParentFunction
     NULL, // validityErrorFunction
     NULL, // setUserValueFunction
-    10,
+    15,
     members
 };
 

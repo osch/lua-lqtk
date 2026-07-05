@@ -63,7 +63,7 @@ namespace lqtk
     QWidgetItemWrapper::~QWidgetItemWrapper() {
         trace::printf("Deleting lqtk::QWidgetItemWrapper: %p\n", this);
         if (lqtk_stateGuard) {
-            lua_State* L = lqtk_stateGuard->L;
+            lua_State* L = lqtk_stateGuard->getL();
             if (L) {
                 QWidgetItem* objPtr = this;
                 BindingUtil::callLuaDestructor(L, lqtk_destruct, objPtr, "QWidgetItem");
@@ -216,7 +216,7 @@ namespace lqtk
                 if (args.hasValidResult) {
                     return args.rslt;
                 } else {
-                    const char* msg = "an object of type 'QWidget*'";
+                    const char* msg = "an object of type 'QWidget'";
                     BindingUtil::throwMethodImplRsltError(L, args.arg1, "QWidgetItem", "widget", msg);
                 }
             }
@@ -316,7 +316,7 @@ extern "C" int lqtk_QWidgetItem_widget(lua_State* L)
         if (nargs == 1) { do {
             args->arg_1_1.check(L, argOffs+1);
             {
-                args->rslt_1 =
+                args->rslt_1 = 
                     args->arg_1_1.getValue()->QWidgetItem::widget();
                 args->rslt_1.push(L, NOT_OWNER);
                 return 1;
@@ -387,7 +387,6 @@ static bool setUserValueFunction(void* objectPtr, StateGuard* guard)
 }
 
 /* ============================================================================================ */
-
 
 struct lqtk_QWidgetItem_new_Args
 {

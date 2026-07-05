@@ -444,6 +444,49 @@ private:
 
 /* ============================================================================================ */
 
+template<> class ToLua<QList<int>> : public ToLuaBase
+{
+public:
+    typedef QList<int> ValueType;
+    
+    ToLua()
+        : value()
+    {}
+    
+    ToLua(const ValueType& value)
+        : value(value)
+    {}
+
+    operator ValueType() const {
+        return value;
+    }
+    
+    void operator=(const ValueType& rhs) {
+        value = rhs;
+    }
+    
+    template<class T>
+    void operator=(const QList<T>& rhs) {
+        value = QList<int>();
+        for (int i = 0; i < rhs.count(); ++i) {
+            value[i] = rhs[i];
+        }
+    }
+    
+    void push(lua_State* L)  {
+        lua_newtable(L);                                                             // -> list
+        for (int i = 0; i < value.count(); ++i) {
+            lua_pushinteger(L, value.at(i));                                         // -> list, el
+            lua_rawseti(L, -2, i + 1);                                               // -> list
+        }
+    }
+
+private:
+    ValueType value;
+};
+
+/* ============================================================================================ */
+
 template<class QType> class ToLua<QList<QType>> : public ToLuaBase
 {
 public:
@@ -477,7 +520,6 @@ public:
 private:
     ValueType value;
 };
-
 /* ============================================================================================ */
 
 } // namespace lqtk
